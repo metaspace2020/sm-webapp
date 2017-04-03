@@ -5,4 +5,4 @@ placement: bottom
 route: 'datasets'
 ---
 
-Latest datasets are listed here. This is handy when you upload multiple related datasets on the same day. But that's just scratching the surface: try clicking on a lab name, for example!
+The latest annotated datasets from all submitters are shown here. If you just submitted one it should be near the top - click on 'Browse annotations' to jump to the molecules.
