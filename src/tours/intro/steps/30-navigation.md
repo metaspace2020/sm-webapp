@@ -6,4 +6,4 @@ nextOnTargetClick: true
 route: annotations
 ---
 
-Click on a row to select the annotation. You can also use up/down keys. (j/k also work)
+Clicking on a row will select the annotation and show you the spatial distribution in the dataset. You can also use up/down keys to go between annotations. (j/k also work)
