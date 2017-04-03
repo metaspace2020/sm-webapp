@@ -5,7 +5,7 @@ placement: bottom
 query: {show: 4}
 ---
 
-The metabolite-spectrum match (MSM) score quantifies our confidence in an annotation (the closer to 1, the better). It evaluates whether signals in the match against the theoretical isotope pattern for the molecular formula.
+The metabolite-spectrum match (MSM) score quantifies our confidence in an annotation (the closer to 1, the better). It evaluates the degree to which signals in the data match the theoretical isotope pattern for the molecular formula.
 
 It is composed from the following measures:
 - &rho;<sub>spatial</sub> quantifies the correlation between ion images of the isotope peaks. The score compares the principal peak against all others, weighted by the theoretical abundances
