@@ -1,11 +1,12 @@
 <template>
   <div id="alignment-page">
 
-    <div class="image-alignment-top">
-      <div class="image-alignment-header" style="text-align: left"><h3 style="margin: 5px; align-content: left">Dataset: neg_2</h3>
+    <div class="image-alignment-top" >
+      <div class="image-alignment-header" style="text-align: left">
+        <h3 style="margin: 5px; align-content: left">Dataset: neg_2</h3>
         <h4>Align the dataset with an optical image </h4>
 
-        <div id="hints">
+        <div id="hints" v-if="showHints.status === true">
           <p>
             Follow three easy steps:
         </p><ol>
@@ -24,7 +25,7 @@
 
         </div>
         <el-button @click="toggleHints" id="hintsButton">
-          {{ showHideButton.text }}
+          {{ showHints.text }}
         </el-button>
       </div>
 
@@ -163,7 +164,8 @@
        initialTransform: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
        padding: 100,
        angle: 0,
-       showHideButton: {
+       showHints: {
+         status: true,
          text: 'Hide hints'
        }
      }
@@ -364,14 +366,12 @@
      },
 
      toggleHints() {
-       let x = document.getElementById("hints");
-       console.log(this);
-       if (x.style.display === "none") {
-         x.style.display = "block";
-         this.showHideButton.text = "Hide hints";
+       this.showHints.status = this.showHints.status !== true;
+
+       if (this.showHints.status) {
+         this.showHints.text = "Hide hints";
        } else {
-         x.style.display = "none";
-         this.showHideButton.text = "Show hints";
+         this.showHints.text = "Show hints";
        }
      }
    },
