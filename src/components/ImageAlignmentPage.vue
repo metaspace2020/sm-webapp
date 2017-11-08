@@ -1,9 +1,9 @@
 <template>
   <div id="alignment-page">
 
-    <div class="image-alignment-top" >
+    <div class="image-alignment-top">
       <div class="image-alignment-header" style="text-align: left">
-        <h3 style="margin: 5px; align-content: left">Dataset: neg_2</h3>
+        <h3 style="margin: 5px; align-content: left">Dataset: {{ datasetName }}</h3>
         <h4>Align the dataset with an optical image </h4>
 
         <div id="hints" v-if="showHints.status === true">
@@ -31,7 +31,6 @@
 
       <div class="image-alignment-settings">
         <div>
-          <p style="margin: 5px;">Dataset: {{ datasetName }}</p>
           <label class="optical-image-select el-button">
             <input type="file"
                   style="display: none;"
@@ -64,10 +63,10 @@
         <div class="annotation-selection">
           <span style="font-size: 14px; margin-bottom: 5px;" >Annotation:</span>
           <el-pagination
-                  layout="prev,slot,next"
-                  :total="this.annotations ? this.annotations.length : 0"
-                  :page-size=1
-                  @current-change="updateIndex">
+                layout="prev,slot,next"
+                :total="this.annotations ? this.annotations.length : 0"
+                :page-size=1
+                @current-change="updateIndex">
             <el-select v-model="annotationIndex" filterable class="annotation-short-info">
               <el-option v-for="(annot, i) in annotations"
                          :key="annot.id"
@@ -366,7 +365,7 @@
      },
 
      toggleHints() {
-       this.showHints.status = this.showHints.status !== true;
+       this.showHints.status = !this.showHints.status;
 
        if (this.showHints.status) {
          this.showHints.text = "Hide hints";
