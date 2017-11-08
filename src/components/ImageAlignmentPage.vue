@@ -52,21 +52,18 @@
           Optical image padding, px:
           <el-slider :min=0 :max=500 :step=10 v-model="padding">
           </el-slider>
-
           IMS image opacity:
           <el-slider :min=0 :max=1 :step=0.01 v-model="annotImageOpacity">
           </el-slider>
-
-
         </div>
 
         <div class="annotation-selection">
           <span style="font-size: 14px; margin-bottom: 5px;" >Annotation:</span>
           <el-pagination
-                layout="prev,slot,next"
-                :total="this.annotations ? this.annotations.length : 0"
-                :page-size=1
-                @current-change="updateIndex">
+              layout="prev,slot,next"
+              :total="this.annotations ? this.annotations.length : 0"
+              :page-size=1
+              @current-change="updateIndex">
             <el-select v-model="annotationIndex" filterable class="annotation-short-info">
               <el-option v-for="(annot, i) in annotations"
                          :key="annot.id"
