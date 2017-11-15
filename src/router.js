@@ -3,9 +3,9 @@ import AnnotationsPage from './components/AnnotationsPage.vue';
 import DatasetsPage from './components/DatasetsPage.vue';
 import DatasetTable from './components/DatasetTable.vue';
 import MetadataEditPage from './components/MetadataEditPage.vue';
-//import UploadPage from './components/UploadPage.vue';
 import HelpPage from './components/HelpPage.vue';
-//import ImageAlignmentPage from './components/ImageAlignmentPage.vue';
+import GroupPage from './components/GroupPage.vue';
+import GroupInfo from './components/GroupInfo.vue';
 
 import Vue from 'vue';
 import VueRouter from 'vue-router';
@@ -42,7 +42,16 @@ const router = new VueRouter({
       }
     },
     { path: '/about', component: AboutPage },
-    { path: '/help', component: HelpPage }
+    { path: '/help', component: HelpPage },
+    {
+      path: '/group/:group_id',
+      component: GroupPage,
+      children: [
+        { path: 'info', component: GroupInfo, props: {tab: 'info' },
+        { path: 'members', component: GroupInfo, props: {tab: 'members'} },
+        { path: 'datasets', component: GroupInfo, props: {tab: 'datasets'} }
+      ]
+    }
   ]
 })
 

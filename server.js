@@ -214,6 +214,7 @@ router.get('/getToken', (req, res, next) => {
     res.send(jwt.encode({
       'iss': 'METASPACE2020',
       'role': 'admin',
+      'sub': '50328697-caad-4cc3-9d55-2dc7868c0d4d',
       'exp': Math.floor(Date.now() / 1000 + 60),
       'email': 'admin@localhost'
     }, conf.JWT_SECRET));

@@ -39,6 +39,7 @@ export default {
   },
 
   gqlDatasetFilter(state, getters) {
+    // TODO: handle gid/pid (i.e. group/project ID in the route URL)
     const filter = getters.filter;
     const {institution, submitter, datasetIds, polarity,
            organism, organismPart, condition, growthConditions,

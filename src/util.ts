@@ -2,6 +2,8 @@ import * as config from './clientConfig.json';
 import * as scales from 'plotly.js/src/components/colorscale/scales.js';
 import * as extractScale from 'plotly.js/src/components/colorscale/extract_scale.js';
 import * as d3 from 'd3';
+import ElementUI from 'element-ui';
+import {GraphQLError} from 'graphql';
 
 const fuConfig = config.fineUploader;
 
@@ -93,6 +95,24 @@ function scrollDistance(event: MouseWheelEvent) {
   return sY;
 }
 
+type Status = {
+  success: boolean
+  errorMessage?: string
+}
+
+function statusPopup(status: Status) {
+  if (status.success)
+    ElementUI.Message.success('Done');
+  else
+    ElementUI.Message.error(status.errorMessage!!);
+  return status;
+}
+
+function graphqlErrorPopup(err: GraphQLError) {
+  ElementUI.Message.error(err.message);
+  return err;
+}
+
 export {
   renderMolFormula,
   prettifySign,
@@ -103,5 +123,7 @@ export {
   createColormap,
   mzFilterPrecision,
   csvExportHeader,
-  scrollDistance
+  scrollDistance,
+  statusPopup,
+  graphqlErrorPopup
 };
