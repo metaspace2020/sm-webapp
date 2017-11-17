@@ -18,29 +18,26 @@
 
 <script lang="ts">
  import Vue, {ComponentOptions} from 'vue';
+ import * as _ from 'lodash';
 
- interface SearchBox extends Vue {
-   name: string
-   value: string
-   removable: boolean
-   onChange(val: string): void
-   destroy(): void
- }
-
- export default {
+ export default Vue.extend({
    name: 'search-box',
    props: {
      value: String,
      removable: {type: Boolean, default: true}
    },
    methods: {
-     onChange(val) {
+     _input(val: string): void {
        this.$emit('input', val);
        this.$emit('change', val);
      },
-     destroy() {
-       this.$emit('destroy', this.name);
+     onChange: _.debounce(
+       function(this: any, val: string) {
+         this._input(val)
+       }, 300),
+     destroy(): void {
+       this.$emit('destroy', 'search-box');
      }
   }
- } as ComponentOptions<SearchBox>
+ })
 </script>

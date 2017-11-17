@@ -9,20 +9,14 @@
       </el-option>
     </el-select>
 
-    <component v-for="f in activeFilters"
+    <component v-for="(f, idx) in activeFilters"
                :is="f.type"
-               :name="f.name"
+               v-bind="f"
                :options="getFilterOptions(f)"
-               :labels="f.labels"
-               :clearable="f.clearable"
-               :removable="f.removable"
-               :filterable="f.filterable"
-               :optionFormatter="f.optionFormatter"
-               :value="f.value"
-               :valueFormatter="f.valueFormatter"
-               :width="f.width"
-               @change="f.onChange"
-               @destroy="f.onChange(undefined)">
+               :value="filterValue(activeKeys[idx])"
+               @change="onChange(activeKeys[idx], $event)"
+               @destroy="onChange(activeKeys[idx], undefined)"
+    >
     </component>
   </div>
 </template>
@@ -34,43 +28,14 @@
  import DatasetNameFilter from './DatasetNameFilter.vue';
  import MzFilter from './MzFilter.vue';
  import SearchBox from './SearchBox.vue';
- import FILTER_SPECIFICATIONS from '../filterSpecs';
+ import FILTER_SPECIFICATIONS, {filterComponents} from '../filterSpecs';
  import {fetchOptionListsQuery} from '../api/metadata';
  import deepcopy from 'deepcopy';
-
- const filterKeys = [
-   'database',
-   'fdrLevel',
-   'institution',
-   'submitter',
-   'datasetIds',
-   'compoundName',
-   'mz',
-   'polarity',
-   'adduct',
-   'organism',
-   'organismPart',
-   'condition',
-   'growthConditions',
-   'analyzerType',
-   'ionisationSource',
-   'maldiMatrix',
-   'minMSM',
-   'simpleQuery'
- ];
 
  export default {
    name: 'filter-panel',
    props: ["level"],
-   components: {
-     // TODO: fetch these from filterSpecs.js
-     InputFilter,
-     SingleSelectFilter,
-     MultiSelectFilter,
-     DatasetNameFilter,
-     MzFilter,
-     SearchBox
-   },
+   components: filterComponents,
    apollo: {
      optionLists_: {
        query: fetchOptionListsQuery,
@@ -96,13 +61,13 @@
 
      availableFilters() {
        let available = [];
-       for (let key of filterKeys) {
-         if (FILTER_SPECIFICATIONS[key].levels.indexOf(this.level) == -1)
-           continue;
+       FILTER_SPECIFICATIONS.forEach((spec, key) => {
+         const {levels, description} = spec;
+         if (levels.indexOf(this.level) == -1)
+           return;
          if (this.activeKeys.indexOf(key) == -1)
-           available.push({key,
-                           description: FILTER_SPECIFICATIONS[key].description})
-       }
+           available.push({key, description});
+       });
        return available;
      }
    },
@@ -116,18 +81,16 @@
 
    methods: {
      makeFilter(filterKey) {
-       const filterSpec = FILTER_SPECIFICATIONS[filterKey];
-       let self = this;
-       const behaviour = {
-         value: self.filter[filterKey],
-         // passing the value of undefined destroys the tag element
-         onChange(val) {
-           self.$store.commit('updateFilter',
-                              Object.assign(self.filter, {[filterKey]: val}));
-         }
-       };
-       let result = Object.assign({}, filterSpec, behaviour);
-       return result;
+       return FILTER_SPECIFICATIONS.get(filterKey);
+     },
+
+     filterValue(filterKey) {
+       return this.filter[filterKey];
+     },
+
+     onChange(filterKey, val) {
+       this.$store.commit('updateFilter',
+                          Object.assign(this.filter, {[filterKey]: val}));
      },
 
      addFilter(key) {
@@ -138,18 +101,10 @@
      },
 
      getFilterOptions(filter) {
-       // dynamically generated options are supported:
-       // either specify a function of optionLists or one of its field names
-       if (typeof filter.options === 'object')
-         return filter.options;
-       if (!this.optionLists)
+       if (!this.optionLists || (typeof filter.optionList !== 'function'))
          return [];
-       if (typeof filter.options === 'string')
-         return this.optionLists[filter.options];
-       else if (typeof filter.options === 'function') {
-         return filter.options(this.optionLists);
-       }
-       return [];
+       else
+         return filter.optionList(this.optionLists);
      }
    }
  }

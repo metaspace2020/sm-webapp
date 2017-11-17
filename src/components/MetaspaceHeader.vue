@@ -81,7 +81,7 @@
 </template>
 
 <script>
- import FILTER_SPECIFICATIONS from '../filterSpecs.js';
+ import FILTER_SPECIFICATIONS from '../filterSpecs';
  import {encodeParams, DEFAULT_FILTER} from '../url';
  import {getJWT, decodePayload} from '../util';
 

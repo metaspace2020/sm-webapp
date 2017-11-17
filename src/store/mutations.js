@@ -58,7 +58,7 @@ export default {
   },
 
   addFilter (state, name) {
-    const {initialValue} = FILTER_SPECIFICATIONS[name];
+    const {initialValue} = FILTER_SPECIFICATIONS.get(name);
     // FIXME: is there any way to access getters here?
     let filter = Object.assign(decodeParams(state.route),
                                {[name]: initialValue});

@@ -47,7 +47,7 @@ const router = new VueRouter({
       path: '/group/:group_id',
       component: GroupPage,
       children: [
-        { path: 'info', component: GroupInfo, props: {tab: 'info' },
+        { path: 'info', component: GroupInfo, props: {tab: 'info' }},
         { path: 'members', component: GroupInfo, props: {tab: 'members'} },
         { path: 'datasets', component: GroupInfo, props: {tab: 'datasets'} }
       ]

@@ -19,13 +19,11 @@
   </tag-filter>
 </template>
 
-<script lang="ts">
+<script>
  import TagFilter from './TagFilter.vue';
- import Vue, { ComponentOptions } from 'vue';
 
- type Option = string | number;
-
- export default Vue.extend({
+ // creating generic (TypeScript) Vue components seems to be impossible :(
+ export default {
    name: 'single-select-filter',
    components: {
      TagFilter
@@ -33,7 +31,7 @@
    props: {
      name: String,
      options: Array,
-     value: [String, Number],
+     value: null,
      optionFormatter: Function,
      valueFormatter: Function,
      clearable: {type: Boolean, default: false},
@@ -53,23 +51,23 @@
      }
    },
    methods: {
-     formatOption(option: Option): string {
+     formatOption(option) {
        if (this.optionFormatter)
          return this.optionFormatter(option);
        else
          return option + '';
      },
 
-     formatValue(value: Option): string {
+     formatValue(value) {
        if (this.valueFormatter)
          return this.valueFormatter(value);
        else
          return value + '';
      },
 
-     destroy(): void {
+     destroy() {
        this.$emit('destroy');
      }
    }
- })
+ }
 </script>

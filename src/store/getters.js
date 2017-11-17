@@ -1,64 +1,17 @@
 import {mzFilterPrecision} from '../util';
 import {decodeParams, decodeSettings} from '../url';
+import {toGraphQLFilter} from '../filterSpecs';
 
 export default {
-  filter(state) {
-    return decodeParams(state.route);
-  },
+  filter: (state) => decodeParams(state.route),
 
-  settings(state) {
-    return decodeSettings(state.route);
-  },
+  settings: (state) => decodeSettings(state.route),
 
-  ftsQuery(state, getters) {
-    return getters.filter.simpleQuery;
-  },
+  gqlFilter: (state, getters) => toGraphQLFilter(getters.filter),
 
-  gqlAnnotationFilter(state, getters) {
-    const filter = getters.filter;
-    const f = {
-      database: filter.database,
-      compoundQuery: filter.compoundName,
-      adduct: filter.adduct,
-      fdrLevel: filter.fdrLevel
-    };
+  ftsQuery: (state, getters) => getters.filter.simpleQuery,
 
-    if (filter.minMSM)
-      f.msmScoreFilter = {min: filter.minMSM, max: 1.0};
+  gqlAnnotationFilter: (state, getters) => getters.gqlFilter.annotation,
 
-    if (filter.mz) {
-      const mz = parseFloat(filter.mz),
-            deltamz = parseFloat(mzFilterPrecision(mz));
-      f.mzFilter = {
-        min: mz - deltamz,
-        max: mz + deltamz
-      };
-    }
-
-    return f;
-  },
-
-  gqlDatasetFilter(state, getters) {
-    // TODO: handle gid/pid (i.e. group/project ID in the route URL)
-    const filter = getters.filter;
-    const {institution, submitter, datasetIds, polarity,
-           organism, organismPart, condition, growthConditions,
-           ionisationSource, analyzerType, maldiMatrix} = filter;
-    return {
-      institution,
-      submitter,
-
-      // temporary workaround because of array-related bugs in apollo-client
-      ids: datasetIds ? datasetIds.join("|") : null,
-
-      organism,
-      organismPart,
-      condition,
-      growthConditions,
-      ionisationSource,
-      maldiMatrix,
-      analyzerType,
-      polarity: polarity ? polarity.toUpperCase() : null
-    }
-  }
+  gqlDatasetFilter: (state, getters) => getters.gqlFilter.dataset,
 }

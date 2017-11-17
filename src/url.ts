@@ -1,78 +1,42 @@
-import FILTER_SPECIFICATIONS from './filterSpecs.js';
+import FILTER_SPECIFICATIONS, {Filter, FilterKey, FilterLevel} from './filterSpecs';
+import { Dictionary } from './util';
 
 import { invert } from 'lodash';
 import { Location } from 'vue-router';
 
-interface Dictionary<T> {
-  [key: string]: T;
-}
+let URL_TO_FILTER: Dictionary<FilterKey> = {};
+let DEFAULT_FILTER: Dictionary<any> = {};
 
-export const DEFAULT_FILTER: Dictionary<any> = {
-  database: 'HMDB',
-  institution: undefined,
-  submitter: undefined,
-  datasetIds: undefined,
-  minMSM: undefined,
-  compoundName: undefined,
-  adduct: undefined,
-  mz: undefined,
-  fdrLevel: 0.1,
-  polarity: undefined,
-  organism: undefined,
-  organismPart: undefined,
-  condition: undefined,
-  growthConditions: undefined,
-  ionisationSource: undefined,
-  maldiMatrix: undefined,
-  analyzerType: undefined,
-  simpleQuery: ''
+FILTER_SPECIFICATIONS.forEach((v, k) => {
+  URL_TO_FILTER[v.urlShortcut] = k;
+  DEFAULT_FILTER[k] = v.defaultValue;
+})
+
+const PATH_TO_LEVEL: Dictionary<FilterLevel> = {
+  '/annotations': FilterLevel.annotation,
+  '/datasets': FilterLevel.dataset
 };
 
-const FILTER_TO_URL: Dictionary<string> = {
-  database: 'db',
-  institution: 'lab',
-  submitter: 'subm',
-  datasetIds: 'ds',
-  minMSM: 'msm',
-  compoundName: 'mol',
-  adduct: 'add',
-  mz: 'mz',
-  fdrLevel: 'fdr',
-  polarity: 'mode',
-  organism: 'organism',
-  organismPart: 'part',
-  condition: 'cond',
-  growthConditions: 'grow',
-  ionisationSource: 'src',
-  maldiMatrix: 'matrix',
-  analyzerType: 'instr',
-  simpleQuery: 'q'
-};
+export {DEFAULT_FILTER};
 
-const URL_TO_FILTER: Dictionary<string> = invert(FILTER_TO_URL);
-
-const PATH_TO_LEVEL: Dictionary<string> = {
-  '/annotations': 'annotation',
-  '/datasets': 'dataset'
-};
-
-export function encodeParams(filter: any, path: string): Dictionary<string> {
+export function encodeParams(filter: Filter, path: string): Dictionary<string> {
   const level = PATH_TO_LEVEL[path];
   let q: Dictionary<string> = {};
-  for (var key in FILTER_TO_URL) {
-    const {levels, encoding} = FILTER_SPECIFICATIONS[key];
+  FILTER_SPECIFICATIONS.forEach((spec, key) => {
+    const {levels, encoding} = spec;
     if (levels.indexOf(level) == -1)
-      continue;
+      return;
 
-    if (filter[key] != DEFAULT_FILTER[key]) {
+    if (filter[key] != spec.defaultValue) {
+      const param = spec.urlShortcut;
       if (encoding == 'json')
-        q[FILTER_TO_URL[key]] = JSON.stringify(filter[key]);
+        q[param] = JSON.stringify(filter[key]);
       else if (encoding == 'list')
-        q[FILTER_TO_URL[key]] = filter[key].join(',');
+        q[param] = filter[key].join(',');
       else
-        q[FILTER_TO_URL[key]] = filter[key];
+        q[param] = filter[key];
     }
-  }
+  });
   return q;
 }
 
@@ -95,16 +59,18 @@ export function decodeParams(location: Location): Object {
   const level = PATH_TO_LEVEL[path];
 
   let filter: any = {};
-  for (var key in DEFAULT_FILTER)
-    if (FILTER_SPECIFICATIONS[key].levels.indexOf(level) != -1)
-      filter[key] = DEFAULT_FILTER[key];
+
+  FILTER_SPECIFICATIONS.forEach((spec, key) => {
+    if (spec.levels.indexOf(level) != -1)
+      filter[key] = spec.defaultValue;
+  });
 
   for (var key in query) {
     const fKey = URL_TO_FILTER[key];
     if (!fKey)
       continue; // skip params unrelated to filtering
 
-    const {levels, encoding} = FILTER_SPECIFICATIONS[fKey];
+    const {levels, encoding} = FILTER_SPECIFICATIONS.get(fKey)!!;
 
     if (levels.indexOf(level) == -1)
       continue;
@@ -125,6 +91,7 @@ export function decodeParams(location: Location): Object {
     if (filter[fKey] === null)
       filter[fKey] = undefined;
   }
+
   return filter;
 }
 

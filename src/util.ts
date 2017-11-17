@@ -17,10 +17,13 @@ interface StringDictionary {
 
 type JWT = string;
 
-function renderMolFormula(sumFormula: string, adduct: string, polarity: string): string {
+function renderMolFormula(sumFormula: string, adduct: string, polarity?: string): string {
   let result = `[${(sumFormula + adduct).replace(/(\d+)/g, "<sub>$1</sub>")}]`;
   const shorten: StringDictionary = {'POSITIVE': '⁺', 'NEGATIVE': '¯'};
-  result = prettifySign(result) + shorten[polarity];
+  if (polarity && shorten[polarity])
+    result = prettifySign(result) + shorten[polarity];
+  else
+    result = prettifySign(result);
   return result;
 }
 
@@ -113,6 +116,10 @@ function graphqlErrorPopup(err: GraphQLError) {
   return err;
 }
 
+interface Dictionary<T> {
+  [key: string]: T;
+}
+
 export {
   renderMolFormula,
   prettifySign,
@@ -125,5 +132,6 @@ export {
   csvExportHeader,
   scrollDistance,
   statusPopup,
-  graphqlErrorPopup
+  graphqlErrorPopup,
+  Dictionary
 };
