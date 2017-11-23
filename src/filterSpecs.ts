@@ -27,7 +27,7 @@ type OptionList<T> = T[];
 const fixed = <T>(opts: OptionList<T>) => (lists: any) => opts;
 
 /*
-   Extracts a list from fetchOptionListsQuery results (see api/metadata.js)
+   Extracts a list from fetchOptionListsQuery results (see api/metadata.ts)
 */
 const extract = (field: string) => (lists: any) => lists[field];
 
