@@ -1,7 +1,18 @@
 <template>
   <div id="dataset-page">
     <div id="dataset-page-contents">
-      <div id="dataset-page-head">
+      <div style="display: flex; flex-direction: row">
+      <div id="dataset-page__projects" v-if="managedProjects.length > 0">
+        <h3>My Projects</h3>
+
+        <b>You can drag and drop datasets to add them to projects you manage</b>
+
+        <project-item v-for="proj in managedProjects"
+                      :id="proj.id" :name="proj.name">
+        </project-item>
+      </div>
+
+      <div id="dataset-page__datasets">
         <filter-panel level="dataset"></filter-panel>
 
         <div>
@@ -43,6 +54,8 @@
           <div class="dataset-list">
             <dataset-item v-for="(dataset, i) in datasets"
                           :dataset="dataset" :key="dataset.id"
+                          :draggable="managedProjects.length > 0"
+                          @dragstart.native="onDragStart($event, dataset.id)"
                           :class="[i%2 ? 'even': 'odd']">
             </dataset-item>
           </div>
@@ -55,6 +68,7 @@
           <organism-summary-plot></organism-summary-plot>
         </div>
       </div>
+      </div>
     </div>
   </div>
 </template>
@@ -63,6 +77,7 @@
  import {datasetListQuery, datasetCountQuery} from '../api/dataset';
  import {metadataExportQuery} from '../api/metadata';
  import DatasetItem from './DatasetItem.vue';
+ import ProjectItem from './ProjectItem.vue';
  import FilterPanel from './FilterPanel.vue';
  import MassSpecSetupPlot from './plots/MSSetupSummaryPlot.vue';
  import OrganismSummaryPlot from './plots/OrganismSummaryPlot.vue';
@@ -86,6 +101,7 @@
    },
    components: {
      DatasetItem,
+     ProjectItem,
      FilterPanel,
      MassSpecSetupPlot,
      OrganismSummaryPlot,
@@ -120,6 +136,10 @@
        set(value) {
          this.$store.commit('setCurrentTab', value);
        }
+     },
+
+     managedProjects() {
+       return this.$store.getters.myManagedProjects;
      }
    },
 
@@ -247,6 +267,12 @@
        this.$apollo.queries.finishedCount.refresh();
      },
 
+     onDragStart(event, datasetId) {
+       console.log(datasetId);
+       event.dataTransfer.setData('text/plain', datasetId);
+       event.dropEffect = 'link';
+     },
+
      startExport() {
        const chunkSize = 1000;
 
@@ -329,6 +355,10 @@
  #dataset-page {
    display: flex;
    justify-content: center;
+ }
+
+ #dataset-page__projects {
+   min-width: 600px;
  }
 
  /* 1 dataset per row by default*/

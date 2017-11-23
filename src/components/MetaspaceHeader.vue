@@ -83,7 +83,6 @@
 <script>
  import FILTER_SPECIFICATIONS from '../filterSpecs';
  import {encodeParams, DEFAULT_FILTER} from '../url';
- import {getJWT, decodePayload} from '../util';
 
  export default {
    name: 'metaspace-header',
@@ -146,20 +145,11 @@
      },
 
      login() {
-       getJWT().then(jwt => {
-         const {name, email, role} = decodePayload(jwt);
-         if (role != 'anonymous') {
-           this.$store.commit('login', {name, email, role});
-           console.log(`Signed in as ${name} (role: ${role})`);
-         }
-       }).catch(err => console.log(err))
+       this.$store.dispatch('login');
      },
 
      logout() {
-       console.log('logout');
-       fetch('/logout', {credentials: 'include'}).then(() => {
-         this.$store.commit('logout');
-       });
+       this.$store.dispatch('logout');
      }
    }
  }
