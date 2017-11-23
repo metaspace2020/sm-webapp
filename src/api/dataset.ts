@@ -23,6 +23,11 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       status
+      projects {
+        id
+        name
+        manager { id }
+      }
     }
   }`;
 

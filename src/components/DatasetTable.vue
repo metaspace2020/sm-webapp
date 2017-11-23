@@ -8,7 +8,8 @@
         <b>You can drag and drop datasets to add them to projects you manage</b>
 
         <project-item v-for="proj in managedProjects"
-                      :id="proj.id" :name="proj.name">
+                      :project="proj"
+                      @datasetAdded="refetchList">
         </project-item>
       </div>
 
@@ -56,6 +57,7 @@
                           :dataset="dataset" :key="dataset.id"
                           :draggable="managedProjects.length > 0"
                           @dragstart.native="onDragStart($event, dataset.id)"
+                          @project-removed="onDatasetRemovedFromProject"
                           :class="[i%2 ? 'even': 'odd']">
             </dataset-item>
           </div>
@@ -236,6 +238,11 @@
    },
 
    methods: {
+     onDatasetRemovedFromProject() {
+       this.refetchList();
+       this.$store.dispatch('syncProfile', this.$store.getters.myId);
+     },
+
      formatSubmitter: (row, col) =>
        row.submitter.name + " " + row.submitter.surname,
      formatDatasetName: (row, col) =>

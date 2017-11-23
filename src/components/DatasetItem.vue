@@ -56,6 +56,14 @@
               title="Filter by this lab"
               @click="addFilter('institution')"></span>
       </div>
+
+      <div class="ds-info__projects">
+        <el-tag v-for="proj in dataset.projects"
+                :closable="isProjectManager(proj)"
+                @close="removeDatasetFromProject(proj)">
+          {{ proj.name }}
+        </el-tag>
+      </div>
     </div>
 
     <div class="ds-actions">
@@ -105,6 +113,16 @@
  import capitalize from 'lodash/capitalize';
  import {deleteDatasetQuery} from '../api/dataset';
  import {getJWT} from '../util';
+ import gql from 'graphql-tag';
+
+ const removeDatasetFromProjectQuery = gql`
+   mutation RemoveDataset($projectId: String!, $datasetId: String!) {
+     removeDatasetFromProject(datasetId: $datasetId, projectId: $projectId) {
+       success
+       errorMessage
+     }
+   }
+ `;
 
  function removeUnderscores(str) {
    return str.replace(/_/g, ' ');
@@ -225,6 +243,10 @@
        };
      },
 
+     isProjectManager(proj) {
+       return proj.manager.id == this.$store.getters.myId;
+     },
+
      showMetadata() {
        this.showMetadataDialog = true;
      },
@@ -237,36 +259,49 @@
          const {name, surname} = this.dataset.submitter;
          filter[field] = {name, surname};
        } else
-         filter[field] = this.dataset[field] || this[field];
+       filter[field] = this.dataset[field] || this[field];
        this.$store.commit('updateFilter', filter);
      },
 
      openDeleteDialog() {
        this.$confirm("Are you sure you want to delete " +
                      this.formatDatasetName + "?")
-         .then(_ => {
-           getJWT().then(jwt => {
-             this.disabled = true;
-             return this.$apollo.mutate({
-               mutation: deleteDatasetQuery,
-               variables: {
-                 jwt,
-                 id: this.dataset.id
-             }});
-           })
-           .then(resp => resp.data.deleteDataset)
-           .then(status => {
-             if (status != 'success') {
-               this.$message({
-                 message: "Deletion failed :( Contact us: contact@metaspace2020.eu" + "(error: " + status + ")",
-                 type: 'error',
-                 duration: 0,
-                 showClose: true
-               });
-               this.disabled = false;
-             }
-           });
-         }).catch(_ => {});
+           .then(_ => {
+             getJWT().then(jwt => {
+               this.disabled = true;
+               return this.$apollo.mutate({
+                 mutation: deleteDatasetQuery,
+                 variables: {
+                   jwt,
+                   id: this.dataset.id
+                 }});
+             })
+                     .then(resp => resp.data.deleteDataset)
+                     .then(status => {
+                       if (status != 'success') {
+                         this.$message({
+                           message: "Deletion failed :( Contact us: contact@metaspace2020.eu" + "(error: " + status + ")",
+                           type: 'error',
+                           duration: 0,
+                           showClose: true
+                         });
+                         this.disabled = false;
+                       }
+                     });
+           }).catch(_ => {});
+     },
+
+     async removeDatasetFromProject(project) {
+       await this.$confirm("Are you sure you want to remove " + this.dataset.name +
+                           " from project " + project.name + "?");
+       await this.$apollo.mutate({
+         mutation: removeDatasetFromProjectQuery,
+         variables: {
+           projectId: project.id,
+           datasetId: this.dataset.id
+         }});
+       // TODO: error handling
+       this.$emit('project-removed', {projectId: project.id, datasetId: this.dataset.id});
      }
    }
  }

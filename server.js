@@ -215,7 +215,6 @@ router.get('/getToken', (req, res, next) => {
       'iss': 'METASPACE2020',
       'role': 'admin',
       'exp': Math.floor(Date.now() / 1000 + 60),
-      'sub': '5ef11882-6e3c-4782-b498-3e6d6d747f17',
       'email': 'admin@localhost'
     }, conf.JWT_SECRET));
     return;

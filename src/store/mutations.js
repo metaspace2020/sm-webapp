@@ -75,7 +75,7 @@ export default {
     state.tableIsLoading = isLoading;
   },
 
-  login(state, user) {
+  updateUserData(state, user) {
     state.authenticated = true;
     state.user = user;
   },

@@ -27,28 +27,11 @@
    }`;
 
  export default {
-   props: {
-     id: String,
-     name: String
-   },
-   apollo: {
-     datasets: {
-       query: gql`
-         query GetProjectDatasets($projectId: String!) {
-           project(id: $projectId) {
-             datasets {
-               id
-               name
-             }
-           }
-         }`,
-       variables() {
-         return {
-           projectId: this.id
-         }
-       },
-       update: data => data.project.datasets
-     }
+   props: ['project'],
+   computed: {
+     id() { return this.project.id; },
+     name() { return this.project.name; },
+     datasets() { return this.project.datasets; }
    },
    methods: {
      onDrop(event) {
@@ -65,13 +48,12 @@
      addDataset(datasetId) {
        this.$apollo.mutate({
          mutation: addDatasetMutation,
-         variables: {
-           projectId: this.id,
-           datasetId: datasetId
-         }}).then(() => {
-           // FIXME: check return status
-           this.$apollo.queries.datasets.refetch();
-         });
+         variables: {projectId: this.id, datasetId}}
+       ).then(() => {
+         // FIXME: check return status
+         this.$store.dispatch('syncProfile', this.$store.getters.myId);
+         this.$emit('datasetAdded', {projectId: this.id, datasetId});
+       });
      }
    }
  }

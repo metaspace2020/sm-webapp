@@ -22,25 +22,24 @@ query UserProfile($id: String!) {
       manager {
         id
       }
+      datasets {
+        id
+        name
+      }
     }
   }
 }`;
 
 export default {
-  async login({commit}) {
+  async login({dispatch}) {
     try {
       const jwt = await getJWT();
-      const {name, email, sub, role} = decodePayload(jwt);
+      const {sub, role} = decodePayload(jwt);
       if (role == 'anonymous') {
         return;
       }
 
-      const {data} = await apolloClient.query({
-        query: userProfileQuery,
-        variables: {id: sub}
-      });
-
-      commit('login', data.user);
+      dispatch('syncProfile', sub);
     } catch(err) {
       console.error(err);
     }
@@ -50,5 +49,18 @@ export default {
     console.log('logout');
     await fetch('/logout', {credentials: 'include'});
     commit('logout');
+  },
+
+  async syncProfile({commit}, userId) {
+    if (!userId)
+      return;
+
+    const {data} = await apolloClient.query({
+      query: userProfileQuery,
+      variables: {id: userId},
+      fetchPolicy: 'network-only'
+    });
+
+    commit('updateUserData', data.user);
   }
 };
