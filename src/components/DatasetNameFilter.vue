@@ -144,9 +144,10 @@
          variables: {df, orderBy, sortDir}
        }).then(({data}) => {
          this.loading = false;
-         this.options = data.options.sort();
+         this.options = data.options.slice(0).sort();
          this.joinOptions();
        }).catch((err) => {
+         console.error(err);
          // TODO: more error reporting
          this.options = [];
        });
