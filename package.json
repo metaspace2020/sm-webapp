@@ -14,8 +14,9 @@
   "dependencies": {
     "ajv": "^4.10.0",
     "apollo-client": "^1.9.3",
-    "aws-sdk": "^2.36.0",
+    "aws-sdk": "^2.188.0",
     "body-parser": "^1.16.0",
+    "compression": "^1.7.1",
     "concat-files": "https://registry.npmjs.org/concat-files/-/concat-files-0.1.1.tgz",
     "connect-redis": "^3.2.0",
     "cookie-parser": "^1.4.3",
