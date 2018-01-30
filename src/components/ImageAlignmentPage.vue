@@ -407,7 +407,6 @@
   }
 
   .image-alignment-top {
-    position: fixed;
     left: 0px;
     top: 62px;
     z-index: 500;
