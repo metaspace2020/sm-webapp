@@ -98,7 +98,7 @@
                 Reset
               </el-button>
 
-              <el-button @click="deleteImg"
+              <el-button @click="deleteRawImg"
                          v-show="opticalImgUrl">
                 Delete
               </el-button>
@@ -190,6 +190,7 @@
                 fetchPolicy: 'network-only'
             }).then(({data}) => {
                 const {url, transform} = data.rawOpticalImage;
+                consol.log(data.rawOpticalImage)
                 if (transform != null) {
                     this.opticalImgUrl = url;
                     this.initialTransform = transform;
@@ -373,16 +374,52 @@
                     });
             },
 
+            // This is to delete Image from FS
+
+            deleteRawImg() {
+                let imageId = this.opticalImgUrl.split('/');
+                const uri = this.imageStorageUrl + "/delete" + imageId.pop();
+                let xhr = new XMLHttpRequest()
+
+                xhr.open("DELETE", uri, true);
+                xhr.responseType = 'json';
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState == 200) {
+                        console.log('Deleted from FS');
+                        // this.deleteOpticalImage()
+                        //     .then(res => ))
+                    }
+                }
+            },
+
+            // This is to delete Image from DB
+
+            // deleteOpticalImage() {
+            //     return getJWT()
+            //         .then(jwt => {
+            //             this.$apollo.mutate({
+            //                 mutation: delOpticalImageQuery,
+            //                 variables: {
+            //                     jwt,
+            //                     datasetId: this.datasetId
+            //                 }
+            //             })
+            //         })
+            // },
+
             reset() {
                 this.$refs.aligner.reset();
                 this.angle = 0;
             },
 
-            deleteImg() {
-                this.opticalImgUrl = null;
-                this.file = null;
-                this.alreadyUploaded = false;
-            },
+            // This is to delete Image from Browser
+            // deleteImg() {
+            //     console.log(this.opticalImgUrl)
+            //     window.URL.revokeObjectURL(this.opticalImgUrl);
+            //     this.file = null;
+            //     this.opticalImgUrl = null;
+            //     this.alreadyUploaded = false;
+            // },
 
             cancel() {
                 this.$router.go(-1);
