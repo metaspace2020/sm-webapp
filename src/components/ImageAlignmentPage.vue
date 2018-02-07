@@ -36,8 +36,9 @@
         <div>
           <label class="optical-image-select el-button">
             <input type="file"
+                   class="input-optical-image"
                    style="display: none;"
-                   @change="onFileChange"
+                   @change="onFileChange($event)"
                    accept=".jpg, .jpeg"/>
             Select optical image
           </label>
@@ -118,7 +119,7 @@
       </div>
     </div>
     <image-aligner
-            v-if="opticalImgUrl"
+            v-if="opticalImgUrl != null"
             ref="aligner"
             style="position:relative;top:0px;z-index:1;"
             :annotImageOpacity="annotImageOpacity"
@@ -138,7 +139,7 @@
     import ImageAligner from './ImageAligner.vue';
     import {annotationListQuery} from '../api/annotation';
     import {addOpticalImageQuery} from '../api/dataset';
-    import {delOpticalImageQuery} from '../api/dataset';
+    import {deleteOpticalImageQuery} from '../api/dataset';
     import {renderMolFormula, prettifySign, getJWT} from '../util';
     import gql from 'graphql-tag';
 
@@ -190,7 +191,6 @@
                 fetchPolicy: 'network-only'
             }).then(({data}) => {
                 const {url, transform} = data.rawOpticalImage;
-                consol.log(data.rawOpticalImage)
                 if (transform != null) {
                     this.opticalImgUrl = url;
                     this.initialTransform = transform;
@@ -299,6 +299,7 @@
                 this.angle = 0;
                 this.initialTransform = [[1,0,0],[0,1,0],[0,0,1]];
                 this.alreadyUploaded = false;
+                document.querySelector('.input-optical-image').value='';
             },
             updateIndex(newIdx) {
                 this.annotationIndex = newIdx - 1;
@@ -377,19 +378,44 @@
             // This is to delete Image from FS
 
             deleteRawImg() {
-                let imageId = this.opticalImgUrl.split('/');
-                const uri = this.imageStorageUrl + "/delete" + imageId.pop();
-                let xhr = new XMLHttpRequest()
+                if (this.alreadyUploaded) {
+                    let imageId = this.opticalImgUrl.split('/');
+                    const uri = this.imageStorageUrl + "/delete/" + imageId.pop();
+                    let xhr = new XMLHttpRequest()
 
-                xhr.open("DELETE", uri, true);
-                xhr.responseType = 'json';
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState == 200) {
-                        console.log('Deleted from FS');
-                        // this.deleteOpticalImage()
-                        //     .then(res => ))
+                    xhr.open("DELETE", uri, true);
+                    xhr.responseType = 'json';
+                    xhr.onreadystatechange = () => {
+                        if (xhr.status==202 && xhr.readyState == 4) {
+                            // window.URL.revokeObjectURL(this.opticalImgUrl);
+                            // this.file = null;
+                            this.delOpticalImage().then(() => {
+                                console.log(this)
+                                this.opticalImgUrl = null;
+                                this.$message({
+                                    type: 'success',
+                                    message: 'The image and alignment were successfully deleted!'
+                                })
+                            })
+                        }
                     }
+                    xhr.send(null)
                 }
+                this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
+                this.file = '';
+                //this.opticalImgUrl = null;
+            },
+
+            delOpticalImage() {
+                return getJWT()
+                    .then(jwt =>
+                      this.$apollo.mutate({
+                          mutation: deleteOpticalImageQuery,
+                          variables: {
+                              jwt,
+                              datasetId: this.datasetId
+                          }
+                      }))
             },
 
             // This is to delete Image from DB
