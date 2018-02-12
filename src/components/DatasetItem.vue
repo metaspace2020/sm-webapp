@@ -7,6 +7,17 @@
       </dataset-info>
     </el-dialog>
 
+    <div class="opt-image">
+
+      <router-link :to="opticalImageAlignmentHref" v-if="opticalImageSmall">
+      <div class="edit-opt-image" title="Edit Optical Image">
+        <img v-if="opticalImageSmall" :src="opticalImageSmall" width="100px" height="100px" alt="optical_image"/>
+      </div></router-link>
+      <router-link :to="opticalImageAlignmentHref" v-else><div class="no-opt-image" title="Add Optical Image"></div></router-link>
+      <!--<img src="../assets/add_opt_image.svg"></img>-->
+      <!--<a href="/" style="position: center" v-else>Add optical image</a>-->
+    </div>
+
     <div class="ds-info">
       <div>
         <b>{{ formatDatasetName }}</b>
@@ -105,6 +116,7 @@
  import capitalize from 'lodash/capitalize';
  import {deleteDatasetQuery} from '../api/dataset';
  import {getJWT} from '../util';
+ import gql from 'graphql-tag';
 
  function removeUnderscores(str) {
    return str.replace(/_/g, ' ');
@@ -116,7 +128,15 @@
    components: {
      DatasetInfo
    },
+
    computed: {
+     opticalImageAlignmentHref() {
+         return {
+             name: 'add-optical-image',
+             params: {dataset_id: this.dataset.id}
+         };
+     },
+
      formatSubmitter() {
        const { name, surname } = this.dataset.submitter;
        return name + " " + surname;
@@ -207,6 +227,7 @@
        };
      },
 
+
      disabledClass() {
        return this.disabled ? "ds-item-disabled" : "";
      }
@@ -214,9 +235,24 @@
    data() {
      return {
        showMetadataDialog: false,
+       opticalImageSmall: null,
        disabled: false
      };
    },
+
+   mounted() {
+     this.$apollo.query({
+       query: gql`query getOpticalImage($id: String!, $zoom: Float) { opticalImageUrl(datasetId: $id, zoom: $zoom) }`,
+       variables: {
+           id: this.dataset.id,
+           zoom: 1.
+       },
+       fetchPolicy: 'network-only'
+     }).then((res) => {
+       this.opticalImageSmall = res.data.opticalImageUrl;
+     })
+   },
+
    methods: {
      resultsHref(databaseName) {
        return {
@@ -273,6 +309,63 @@
 </script>
 
 <style>
+  .no-opt-image {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-style: dotted;
+  }
+
+  .no-opt-image::before {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: .6;
+    background-image: url('../assets/add_opt_image.png');
+    background-size: contain;
+  }
+
+  .no-opt-image:hover::before{
+    opacity: 1;
+  }
+
+  .edit-opt-image {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 100px;
+  }
+
+  .edit-opt-image::before {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    background-image: url('../assets/edit_opt_image.png');
+    background-size: contain;
+  }
+
+  .edit-opt-image:hover::before {
+    opacity: 0.7;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+    /*.edit-no-optimage {*/
+    /*background: url('../assets/add_opt_image.svg');*/
+  /*}*/
+
  .dataset-item {
    border-radius: 5px;
    width: 100%;
@@ -292,10 +385,16 @@
    justify-content: center;
  }
 
- .ds-info {
+ .opt-image {
+   /*flex-basis: 15%;*/
+   padding: 10px 0 10px 10px;
+   margin: 0px;
+ }
+
+ .ds-info{
    padding: 10px;
    margin: 0px;
-   width: 72%;
+   width: 60%;
  }
 
  .ds-actions {

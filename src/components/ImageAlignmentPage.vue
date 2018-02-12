@@ -85,26 +85,26 @@
 
         <div class="optical-image-submit">
           <el-row :gutter="20" style="margin-bottom: 10px">
-            <el-col :span="12" :offset="12">
+            <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
               <el-button @click="cancel">
                 Cancel
               </el-button>
             </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="12">
+            <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
               <el-button @click="reset"
                          v-show="opticalImgUrl"
                          style="margin-bottom: 10px;">
                 Reset
               </el-button>
-
-              <el-button @click="deleteRawImg"
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
+              <el-button class="del-optical-image" @click="deleteRawImg"
                          v-show="opticalImgUrl">
                 Delete
               </el-button>
             </el-col>
-
             <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
               <el-button type="primary"
                          @click="submit"
@@ -112,8 +112,6 @@
                 Submit
               </el-button>
             </el-col>
-
-
           </el-row>
         </div>
       </div>
@@ -156,9 +154,15 @@
             },
 
             // service for storing raw optical images
+            rawImageStorageUrl: {
+                type: String,
+                default: '/raw_optical_images',
+            },
+            
+            // service for storing zoomed optical images (added/R)
             imageStorageUrl: {
                 type: String,
-                default: '/raw_optical_images'
+                default: '/optical_images',
             }
         },
 
@@ -175,7 +179,8 @@
                 showHints: {
                     status: true,
                     text: 'Hide hints'
-                }
+                },
+                opticalImagesIDs: []
             }
         },
 
@@ -322,7 +327,7 @@
                     return;
                 }
 
-                const uri = this.imageStorageUrl + "/upload/";
+                const uri = this.rawImageStorageUrl + "/upload/";
                 let xhr = new XMLHttpRequest(),
                     fd = new FormData();
                 xhr.open("POST", uri, true);
@@ -330,7 +335,7 @@
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == 4 && xhr.status == 201) {
                         const imageId = xhr.response.image_id,
-                            imageUrl = this.imageStorageUrl + '/' + imageId;
+                            imageUrl = this.rawImageStorageUrl + '/' + imageId;
                         this.addOpticalImage(imageUrl).then(() => {
                             this.$message({
                                 type: 'success',
@@ -375,63 +380,55 @@
                     });
             },
 
-            // This is to delete Image from FS
-
             deleteRawImg() {
-                if (this.alreadyUploaded) {
-                    let imageId = this.opticalImgUrl.split('/');
-                    const uri = this.imageStorageUrl + "/delete/" + imageId.pop();
-                    let xhr = new XMLHttpRequest()
-
-                    xhr.open("DELETE", uri, true);
-                    xhr.responseType = 'json';
-                    xhr.onreadystatechange = () => {
-                        if (xhr.status==202 && xhr.readyState == 4) {
-                            // window.URL.revokeObjectURL(this.opticalImgUrl);
-                            // this.file = null;
-                            this.delOpticalImage().then(() => {
-                                console.log(this)
-                                this.opticalImgUrl = null;
-                                this.$message({
-                                    type: 'success',
-                                    message: 'The image and alignment were successfully deleted!'
-                                })
-                            })
-                        }
-                    }
-                    xhr.send(null)
+              if (this.alreadyUploaded) {
+                let imageId = this.opticalImgUrl.split('/');
+                  let uri = this.rawImageStorageUrl + "/delete/" + imageId.pop();
+                  fetch(uri, {
+                    method: 'delete'
+                  }).then(() => {
+                    this.$apollo.query({
+                      query: gql`query getOpticalImage($id: String!, $zoom: Float) { opticalImageUrl(datasetId: $id, zoom: $zoom) }`,
+                      variables: {
+                        id: this.datasetId,
+                        zoom: -1. //trick to get all optical Image IDs (see also resolver)
+                        },
+                      fetchPolicy: 'network-only'
+                    }).then((res) => {
+                      this.opticalImagesIDs = JSON.parse(res.data.opticalImageUrl);
+                      this.opticalImagesIDs.forEach(Image => {
+                        let uri = this.imageStorageUrl + "/delete/" + Image.id;
+                          fetch(uri, {
+                            method: 'delete'
+                          })
+                      })
+                    }).then(() => {
+                      this.deleteOpticalImagesInDB()
+                        .then(()=>{
+                          this.$message({
+                            type: 'success',
+                            message: 'The image and alignment were successfully deleted!'
+                          })
+                        })
+                      })
+                    })
                 }
-                this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
-                this.file = '';
-                //this.opticalImgUrl = null;
+                 this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
+                 this.file = '';
             },
 
-            delOpticalImage() {
-                return getJWT()
-                    .then(jwt =>
-                      this.$apollo.mutate({
-                          mutation: deleteOpticalImageQuery,
-                          variables: {
-                              jwt,
-                              datasetId: this.datasetId
-                          }
-                      }))
+            deleteOpticalImagesInDB() {
+              return getJWT()
+                .then(jwt => {
+                  this.$apollo.mutate({
+                    mutation: deleteOpticalImageQuery,
+                    variables: {
+                      jwt,
+                      datasetId: this.datasetId
+                    }
+                  })
+                })
             },
-
-            // This is to delete Image from DB
-
-            // deleteOpticalImage() {
-            //     return getJWT()
-            //         .then(jwt => {
-            //             this.$apollo.mutate({
-            //                 mutation: delOpticalImageQuery,
-            //                 variables: {
-            //                     jwt,
-            //                     datasetId: this.datasetId
-            //                 }
-            //             })
-            //         })
-            // },
 
             reset() {
                 this.$refs.aligner.reset();

@@ -51,6 +51,7 @@ export const metadataExportQuery = gql`
         surname
       }
       organism
+      optical_image
       organismPart
       condition
       growthConditions
