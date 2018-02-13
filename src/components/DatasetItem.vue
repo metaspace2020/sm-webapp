@@ -8,14 +8,20 @@
     </el-dialog>
 
     <div class="opt-image">
-
-      <router-link :to="opticalImageAlignmentHref" v-if="opticalImageSmall">
-      <div class="edit-opt-image" title="Edit Optical Image">
+      <router-link :to="opticalImageAlignmentHref" v-if="opticalImageSmall && haveEditAccess && dataset.status != 'STARTED'" title="Edit Optical Image">
+        <div class="edit-opt-image">
+            <img class="opt-image-thumbnail" :src="opticalImageSmall" width="100px" height="100px" alt="edit_optical_image"/>
+        </div>
+      </router-link>
+      <router-link :to="opticalImageAlignmentHref" v-else-if="haveEditAccess && dataset.status != 'STARTED'" title="Add Optical Image">
+        <div class="no-opt-image" >
+            <img src="../assets/empty_rect_100_100.png" width="100px" height="100px" alt="edit_optical_image"/>
+        </div>
+      </router-link>
+      <div class="edit-opt-image-guest" v-else-if="dataset.status != 'STARTED'">
         <img v-if="opticalImageSmall" :src="opticalImageSmall" width="100px" height="100px" alt="optical_image"/>
-      </div></router-link>
-      <router-link :to="opticalImageAlignmentHref" v-else><div class="no-opt-image" title="Add Optical Image"></div></router-link>
-      <!--<img src="../assets/add_opt_image.svg"></img>-->
-      <!--<a href="/" style="position: center" v-else>Add optical image</a>-->
+        <img v-else src="../assets/empty_rect_100_100.png" width="100px" height="100px" alt="optical_image"/>
+      </div>
     </div>
 
     <div class="ds-info">
@@ -66,6 +72,9 @@
               v-html="formatInstitution"
               title="Filter by this lab"
               @click="addFilter('institution')"></span>
+      </div>
+      <div v-if="dataset.status != 'STARTED'">
+        <span>{{formatFdr.n}} annotations @ FDR {{formatFdr.level}} %</span>
       </div>
     </div>
 
@@ -227,9 +236,12 @@
        };
      },
 
-
      disabledClass() {
        return this.disabled ? "ds-item-disabled" : "";
+     },
+
+     formatFdr() {
+       return JSON.parse(this.dataset.fdrCounts)[1];
      }
    },
    data() {
@@ -316,6 +328,7 @@
     height: 100px;
     border: 1px solid rgba(0, 0, 0, 0.6);
     border-style: dotted;
+    cursor: pointer;
   }
 
   .no-opt-image::before {
@@ -330,20 +343,22 @@
     opacity: .6;
     background-image: url('../assets/add_opt_image.png');
     background-size: contain;
+    cursor: pointer;
   }
 
   .no-opt-image:hover::before{
     opacity: 1;
   }
 
-  .edit-opt-image {
+  .edit-opt-image, .edit-opt-image-guest {
     position: relative;
     display: block;
     width: 100px;
     height: 100px;
+    z-index: 0;
   }
 
-  .edit-opt-image::before {
+  .edit-opt-image:hover::before {
     position: absolute;
     content: '';
     display: block;
@@ -352,19 +367,17 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0;
     background-image: url('../assets/edit_opt_image.png');
     background-size: contain;
   }
 
-  .edit-opt-image:hover::before {
-    opacity: 0.7;
-    background-color: rgba(255, 255, 255, 0.5);
+  .edit-opt-image:hover {
+    cursor: pointer;
   }
 
-    /*.edit-no-optimage {*/
-    /*background: url('../assets/add_opt_image.svg');*/
-  /*}*/
+  .opt-image-thumbnail:hover {
+    opacity: 0.2;
+  }
 
  .dataset-item {
    border-radius: 5px;
@@ -386,7 +399,6 @@
  }
 
  .opt-image {
-   /*flex-basis: 15%;*/
    padding: 10px 0 10px 10px;
    margin: 0px;
  }

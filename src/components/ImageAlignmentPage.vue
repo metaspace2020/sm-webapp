@@ -394,7 +394,7 @@
                         zoom: -1. //trick to get all optical Image IDs (see also resolver)
                         },
                       fetchPolicy: 'network-only'
-                    }).then((res) => {
+                    }).then(res => {
                       this.opticalImagesIDs = JSON.parse(res.data.opticalImageUrl);
                       this.opticalImagesIDs.forEach(Image => {
                         let uri = this.imageStorageUrl + "/delete/" + Image.id;
@@ -404,7 +404,7 @@
                       })
                     }).then(() => {
                       this.deleteOpticalImagesInDB()
-                        .then(()=>{
+                        .then(() => {
                           this.$message({
                             type: 'success',
                             message: 'The image and alignment were successfully deleted!'
@@ -434,15 +434,6 @@
                 this.$refs.aligner.reset();
                 this.angle = 0;
             },
-
-            // This is to delete Image from Browser
-            // deleteImg() {
-            //     console.log(this.opticalImgUrl)
-            //     window.URL.revokeObjectURL(this.opticalImgUrl);
-            //     this.file = null;
-            //     this.opticalImgUrl = null;
-            //     this.alreadyUploaded = false;
-            // },
 
             cancel() {
                 this.$router.go(-1);
