@@ -117,7 +117,7 @@
       </div>
     </div>
     <image-aligner
-            v-if="opticalImgUrl != null"
+            v-if="opticalImgUrl"
             ref="aligner"
             style="position:relative;top:0px;z-index:1;"
             :annotImageOpacity="annotImageOpacity"
