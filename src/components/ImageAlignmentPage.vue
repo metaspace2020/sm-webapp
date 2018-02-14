@@ -65,10 +65,10 @@
         <div class="annotation-selection">
           <span style="font-size: 14px; margin-bottom: 5px;" >Annotation:</span>
           <el-pagination
-                  layout="prev,slot,next"
-                  :total="this.annotations ? this.annotations.length : 0"
-                  :page-size=1
-                  @current-change="updateIndex">
+              layout="prev,slot,next"
+              :total="this.annotations ? this.annotations.length : 0"
+              :page-size=1
+              @current-change="updateIndex">
             <el-select v-model="annotationIndex" filterable class="annotation-short-info">
               <el-option v-for="(annot, i) in annotations"
                          :key="annot.id"
@@ -100,7 +100,7 @@
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
-              <el-button class="del-optical-image" @click="deleteRawImg"
+              <el-button class="del-optical-image" @click="deleteOpticalImg"
                          v-show="opticalImgUrl">
                 Delete
               </el-button>
@@ -158,7 +158,7 @@
                 type: String,
                 default: '/raw_optical_images',
             },
-            
+
             // service for storing zoomed optical images (added/R)
             imageStorageUrl: {
                 type: String,
@@ -167,21 +167,21 @@
         },
 
         data() {
-            return {
-                annotImageOpacity: 1,
-                annotationIndex: 0,
-                file: null,
-                opticalImgUrl: null,
-                alreadyUploaded: false,
-                initialTransform: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-                padding: 100,
-                angle: 0,
-                showHints: {
-                    status: true,
-                    text: 'Hide hints'
-                },
-                opticalImagesIDs: []
-            }
+          return {
+            annotImageOpacity: 1,
+            annotationIndex: 0,
+            file: null,
+            opticalImgUrl: null,
+            alreadyUploaded: false,
+            initialTransform: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            padding: 100,
+            angle: 0,
+            showHints: {
+                status: true,
+                text: 'Hide hints'
+            },
+            opticalImagesIDs: []
+          }
         },
 
         mounted() {
@@ -380,7 +380,7 @@
                     });
             },
 
-            deleteRawImg() {
+            deleteOpticalImg() {
               if (this.alreadyUploaded) {
                 let imageId = this.opticalImgUrl.split('/');
                   let uri = this.rawImageStorageUrl + "/delete/" + imageId.pop();
