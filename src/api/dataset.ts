@@ -23,6 +23,7 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       status
+      fdrCounts
     }
   }`;
 
@@ -51,4 +52,9 @@ export const addOpticalImageQuery =
 export const opticalImageQuery =
   gql`query ($datasetId: String!, $zoom: Float!) {
     opticalImageUrl(datasetId: $datasetId, zoom: $zoom)
+  }`;
+
+export const deleteOpticalImageQuery =
+  gql`mutation ($jwt: String!, $datasetId: String!) {
+    deleteOpticalImage(jwt: $jwt, datasetId: $datasetId)
   }`;
