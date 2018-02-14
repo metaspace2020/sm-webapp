@@ -74,7 +74,7 @@
               @click="addFilter('institution')"></span>
       </div>
       <div v-if="dataset.status != 'STARTED'">
-        <span>{{formatFdr.n}} annotations @ FDR {{formatFdr.level}} %</span>
+        <span>{{formatFdr.n}} annotations @ FDR {{formatFdr.level}}%</span>
       </div>
     </div>
 
