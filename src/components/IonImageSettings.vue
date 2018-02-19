@@ -38,7 +38,7 @@
    },
    data() {
      return {
-       availableScales: ["Viridis", "Cividis", "Hot", "Greys", "Portland", "YlGnBu"]
+       availableScales: ["Viridis", "Cividis", "Hot", "YlGnBu", "Portland", "Greys"]
      };
    },
    methods: {

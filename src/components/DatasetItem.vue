@@ -374,7 +374,6 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    /*background-image: url('../assets/edit_opt_image.png');*/
     background-size: contain;
   }
 
