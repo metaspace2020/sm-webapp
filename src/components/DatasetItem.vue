@@ -8,19 +8,14 @@
     </el-dialog>
 
     <div class="opt-image">
-      <router-link :to="opticalImageAlignmentHref" v-if="opticalImageSmall && haveEditAccess && dataset.status != 'STARTED'" title="Edit Optical Image">
-        <div class="edit-opt-image">
-            <img class="opt-image-thumbnail" :src="opticalImageSmall" width="100px" height="100px" alt="edit_optical_image"/>
+      <router-link :to="opticalImageAlignmentHref" v-if="haveEditAccess">
+        <div class="edit-opt-image" v-if="thumbnailCheck" title="Edit Optical Image">
+          <img class="opt-image-thumbnail" :src="opticalImageSmall" width="100px" height="100px" alt="Edit optical image"/>
         </div>
+        <div class="no-opt-image" v-else title="Add Optical Image"></div>
       </router-link>
-      <router-link :to="opticalImageAlignmentHref" v-else-if="haveEditAccess && dataset.status != 'STARTED'" title="Add Optical Image">
-        <div class="no-opt-image" >
-            <img src="../assets/empty_rect_100_100.png" width="100px" height="100px" alt="edit_optical_image"/>
-        </div>
-      </router-link>
-      <div class="edit-opt-image-guest" v-else-if="dataset.status != 'STARTED'">
-        <img v-if="opticalImageSmall" :src="opticalImageSmall" width="100px" height="100px" alt="optical_image"/>
-        <img v-else src="../assets/empty_rect_100_100.png" width="100px" height="100px" alt="optical_image"/>
+      <div class="edit-opt-image-guest" v-else>
+        <img v-if="thumbnailCheck" :src="opticalImageSmall" width="100px" height="100px" alt="Optical image"/>
       </div>
     </div>
 
@@ -73,8 +68,8 @@
               title="Filter by this lab"
               @click="addFilter('institution')"></span>
       </div>
-      <div v-if="dataset.status != 'STARTED'">
-        <span>{{formatFdr.n}} annotations @ FDR {{formatFdr.level}}%</span>
+      <div v-if="dataset.status == 'FINISHED'">
+        <span>{{formatFdrCounts}} annotations @ FDR {{formatFdrLevel}}%</span>
       </div>
     </div>
 
@@ -123,7 +118,7 @@
 <script>
  import DatasetInfo from './DatasetInfo.vue';
  import capitalize from 'lodash/capitalize';
- import {deleteDatasetQuery} from '../api/dataset';
+ import {deleteDatasetQuery, opticalImageQuery} from '../api/dataset';
  import {getJWT} from '../util';
  import gql from 'graphql-tag';
 
@@ -139,6 +134,10 @@
    },
 
    computed: {
+     thumbnailCheck() {
+       return this.opticalImageSmall && this.dataset.status == 'FINISHED'
+     },
+
      opticalImageAlignmentHref() {
          return {
              name: 'add-optical-image',
@@ -240,8 +239,12 @@
        return this.disabled ? "ds-item-disabled" : "";
      },
 
-     formatFdr() {
-       return JSON.parse(this.dataset.fdrCounts)[1];
+     formatFdrLevel() {
+       return this.dataset.fdrCounts.level;
+     },
+
+     formatFdrCounts() {
+       return this.dataset.fdrCounts.counts;
      }
    },
    data() {
@@ -254,10 +257,10 @@
 
    mounted() {
      this.$apollo.query({
-       query: gql`query getOpticalImage($id: String!, $zoom: Float) { opticalImageUrl(datasetId: $id, zoom: $zoom) }`,
+       query: opticalImageQuery,
        variables: {
-           id: this.dataset.id,
-           zoom: 1.
+         datasetId: this.dataset.id,
+         zoom: 1.
        },
        fetchPolicy: 'network-only'
      }).then((res) => {
@@ -340,14 +343,14 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    opacity: .6;
+    opacity: .5;
     background-image: url('../assets/add_opt_image.png');
     background-size: contain;
     cursor: pointer;
   }
 
   .no-opt-image:hover::before{
-    opacity: 1;
+    opacity: .7;
   }
 
   .edit-opt-image, .edit-opt-image-guest {
@@ -359,15 +362,19 @@
   }
 
   .edit-opt-image:hover::before {
+    font-family: 'element-icons' !important;
+    font-style: normal;
+    font-size: 1.5em;
+    color: #2c3e50;
     position: absolute;
-    content: '';
+    content: '\E61C';
     display: block;
     width: 30px;
     height: 30px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background-image: url('../assets/edit_opt_image.png');
+    /*background-image: url('../assets/edit_opt_image.png');*/
     background-size: contain;
   }
 

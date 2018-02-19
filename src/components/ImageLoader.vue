@@ -52,7 +52,7 @@
      },
      colormap: {
        type: String,
-       default: 'Cividis'
+       default: 'Viridis'
      },
      opticalSrc: {
        type: String,

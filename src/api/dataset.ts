@@ -23,13 +23,29 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       status
-      fdrCounts
+      fdrCounts {
+        level
+        counts
+      }
     }
   }`;
 
 export const datasetCountQuery =
   gql`query CountDatasets($dFilter: DatasetFilter, $query: String) {
     countDatasets(filter: $dFilter, simpleQuery: $query)
+  }`;
+
+export const opticalImageQuery =
+    gql`query ($datasetId: String!, $zoom: Float!) {
+    opticalImageUrl(datasetId: $datasetId, zoom: $zoom)
+  }`;
+
+export const rawOpticalImageQuery =
+    gql`query Q($ds_id: String!) {
+    rawOpticalImage(datasetId: $ds_id) {
+      url
+      transform
+    }
   }`;
 
 export const submitDatasetQuery =
@@ -47,11 +63,6 @@ export const addOpticalImageQuery =
                 $datasetId: String!, $transform: [[Float]]!) {
     addOpticalImage(input: {jwt: $jwt, datasetId: $datasetId,
                             imageUrl: $imageUrl, transform: $transform})
-  }`;
-
-export const opticalImageQuery =
-  gql`query ($datasetId: String!, $zoom: Float!) {
-    opticalImageUrl(datasetId: $datasetId, zoom: $zoom)
   }`;
 
 export const deleteOpticalImageQuery =
