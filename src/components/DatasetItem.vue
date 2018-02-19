@@ -7,6 +7,18 @@
       </dataset-info>
     </el-dialog>
 
+    <div class="opt-image">
+      <router-link :to="opticalImageAlignmentHref" v-if="haveEditAccess">
+        <div class="edit-opt-image" v-if="thumbnailCheck" title="Edit Optical Image">
+          <img class="opt-image-thumbnail" :src="opticalImageSmall" width="100px" height="100px" alt="Edit optical image"/>
+        </div>
+        <div class="no-opt-image" v-else title="Add Optical Image"></div>
+      </router-link>
+      <div class="edit-opt-image-guest" v-else>
+        <img v-if="thumbnailCheck" :src="opticalImageSmall" width="100px" height="100px" alt="Optical image"/>
+      </div>
+    </div>
+
     <div class="ds-info">
       <div>
         <b>{{ formatDatasetName }}</b>
@@ -56,6 +68,9 @@
               title="Filter by this lab"
               @click="addFilter('institution')"></span>
       </div>
+      <div v-if="dataset.status == 'FINISHED'">
+        <span>{{formatFdrCounts}} annotations @ FDR {{formatFdrLevel}}%</span>
+      </div>
     </div>
 
     <div class="ds-actions">
@@ -103,8 +118,9 @@
 <script>
  import DatasetInfo from './DatasetInfo.vue';
  import capitalize from 'lodash/capitalize';
- import {deleteDatasetQuery} from '../api/dataset';
+ import {deleteDatasetQuery, opticalImageQuery} from '../api/dataset';
  import {getJWT} from '../util';
+ import gql from 'graphql-tag';
 
  function removeUnderscores(str) {
    return str.replace(/_/g, ' ');
@@ -116,7 +132,19 @@
    components: {
      DatasetInfo
    },
+
    computed: {
+     thumbnailCheck() {
+       return this.opticalImageSmall && this.dataset.status == 'FINISHED'
+     },
+
+     opticalImageAlignmentHref() {
+         return {
+             name: 'add-optical-image',
+             params: {dataset_id: this.dataset.id}
+         };
+     },
+
      formatSubmitter() {
        const { name, surname } = this.dataset.submitter;
        return name + " " + surname;
@@ -209,14 +237,37 @@
 
      disabledClass() {
        return this.disabled ? "ds-item-disabled" : "";
+     },
+
+     formatFdrLevel() {
+       return this.dataset.fdrCounts.level;
+     },
+
+     formatFdrCounts() {
+       return this.dataset.fdrCounts.counts;
      }
    },
    data() {
      return {
        showMetadataDialog: false,
+       opticalImageSmall: null,
        disabled: false
      };
    },
+
+   mounted() {
+     this.$apollo.query({
+       query: opticalImageQuery,
+       variables: {
+         datasetId: this.dataset.id,
+         zoom: 1.
+       },
+       fetchPolicy: 'network-only'
+     }).then((res) => {
+       this.opticalImageSmall = res.data.opticalImageUrl;
+     })
+   },
+
    methods: {
      resultsHref(databaseName) {
        return {
@@ -273,6 +324,67 @@
 </script>
 
 <style>
+  .no-opt-image {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-style: dotted;
+    cursor: pointer;
+  }
+
+  .no-opt-image::before {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: .5;
+    background-image: url('../assets/add_opt_image.png');
+    background-size: contain;
+    cursor: pointer;
+  }
+
+  .no-opt-image:hover::before{
+    opacity: .7;
+  }
+
+  .edit-opt-image, .edit-opt-image-guest {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 100px;
+    z-index: 0;
+  }
+
+  .edit-opt-image:hover::before {
+    font-family: 'element-icons' !important;
+    font-style: normal;
+    font-size: 1.5em;
+    color: #2c3e50;
+    position: absolute;
+    content: '\E61C';
+    display: block;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-size: contain;
+  }
+
+  .edit-opt-image:hover {
+    cursor: pointer;
+  }
+
+  .opt-image-thumbnail:hover {
+    opacity: 0.2;
+  }
+
  .dataset-item {
    border-radius: 5px;
    width: 100%;
@@ -292,10 +404,15 @@
    justify-content: center;
  }
 
- .ds-info {
+ .opt-image {
+   padding: 10px 0 10px 10px;
+   margin: 0px;
+ }
+
+ .ds-info{
    padding: 10px;
    margin: 0px;
-   width: 72%;
+   width: 60%;
  }
 
  .ds-actions {
