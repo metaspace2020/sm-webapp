@@ -134,10 +134,12 @@
 </template>
 
 <script>
+
  import ImageAligner from './ImageAligner.vue';
  import {annotationListQuery} from '../api/annotation';
  import {addOpticalImageQuery, deleteOpticalImageQuery, rawOpticalImageQuery} from '../api/dataset';
  import {renderMolFormula, prettifySign, getJWT} from '../util';
+
  import gql from 'graphql-tag';
 
  export default {
