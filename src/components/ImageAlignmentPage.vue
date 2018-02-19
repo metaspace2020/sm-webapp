@@ -100,7 +100,7 @@
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12" :offset="opticalImgUrl ? 0 : 12">
-              <el-button class="del-optical-image" @click="deleteOpticalImg"
+              <el-button class="del-optical-image" @click="deleteOpticalImages"
                          v-show="opticalImgUrl">
                 Delete
               </el-button>
@@ -134,11 +134,12 @@
 </template>
 
 <script>
- import {annotationListQuery} from '../api/annotation';
- import {addOpticalImageQuery} from '../api/dataset';
- import {deleteOpticalImageQuery} from '../api/dataset';
- import {renderMolFormula, prettifySign, getJWT} from '../util';
+
  import ImageAligner from './ImageAligner.vue';
+ import {annotationListQuery} from '../api/annotation';
+ import {addOpticalImageQuery, deleteOpticalImageQuery, rawOpticalImageQuery} from '../api/dataset';
+ import {renderMolFormula, prettifySign, getJWT} from '../util';
+
  import gql from 'graphql-tag';
 
  export default {
@@ -179,19 +180,13 @@
        showHints: {
          status: true,
          text: 'Hide hints'
-       },
-       opticalImagesIDs: []
+       }
      }
    },
 
    mounted() {
      this.$apollo.query({
-       query: gql`query Q($ds_id: String!) {
-        rawOpticalImage(datasetId: $ds_id) {
-          url
-          transform
-        }
-      }`,
+       query: rawOpticalImageQuery,
        variables: {ds_id: this.datasetId},
        fetchPolicy: 'network-only'
      }).then(({data}) => {
@@ -352,15 +347,15 @@
          } else if (xhr.readyState == 4) {
            this.$message({
              type: 'error',
-              message: "Couldn't upload the optical image due to server error"
-            });
-          }
-        };
-        fd.append('raw_optical_image', this.file);
-        xhr.send(fd);
-      },
+             message: "Couldn't upload the optical image due to server error"
+           });
+         }
+       };
+       fd.append('raw_optical_image', this.file);
+       xhr.send(fd);
+     },
 
-      addOpticalImage(imageUrl) {
+     addOpticalImage(imageUrl) {
        return getJWT()
            .then(jwt =>
                this.$apollo.mutate({
@@ -380,54 +375,28 @@
            });
      },
 
-     deleteOpticalImg() {
-       if (this.alreadyUploaded) {
-         let imageId = this.opticalImgUrl.split('/');
-         let uri = this.rawImageStorageUrl + "/delete/" + imageId.pop();
-         fetch(uri, {
-           method: 'delete'
-         }).then(() => {
-           this.$apollo.query({
-             query: gql`query getOpticalImage($id: String!, $zoom: Float) { opticalImageUrl(datasetId: $id, zoom: $zoom) }`,
+     async deleteOpticalImages() {
+       try {
+         if (this.alreadyUploaded) {
+           let jwt = await getJWT();
+           await this.$apollo.mutate({
+             mutation: deleteOpticalImageQuery,
              variables: {
-               id: this.datasetId,
-               zoom: -1. //trick to get all optical Image IDs (see also resolver)
-             },
-             fetchPolicy: 'network-only'
-           }).then(res => {
-             this.opticalImagesIDs = JSON.parse(res.data.opticalImageUrl);
-             this.opticalImagesIDs.forEach(Image => {
-               let uri = this.imageStorageUrl + "/delete/" + Image.id;
-               fetch(uri, {
-                 method: 'delete'
-               })
-             })
-           }).then(() => {
-             this.deleteOpticalImagesInDB()
-                 .then(() => {
-                   this.$message({
-                     type: 'success',
-                     message: 'The image and alignment were successfully deleted!'
-                   })
-                 })
-           })
-         })
+               jwt,
+               datasetId: this.datasetId
+             }
+           });
+           await this.$message({
+             type: 'success',
+             message: 'The image and alignment were successfully deleted!'
+           });
+         }
+         this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
+         this.file = '';
+         return 'Success'
+       } catch(e) {
+         return e.message
        }
-       this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
-       this.file = '';
-     },
-
-     deleteOpticalImagesInDB() {
-       return getJWT()
-           .then(jwt => {
-             this.$apollo.mutate({
-               mutation: deleteOpticalImageQuery,
-               variables: {
-                 jwt,
-                 datasetId: this.datasetId
-               }
-             })
-           })
      },
 
      reset() {

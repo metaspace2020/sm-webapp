@@ -282,14 +282,7 @@
          messages[err.dataPath] = err.message;
        }
        return messages;
-     },
-
-     opticalImageAlignmentHref() {
-       return {
-         name: 'add-optical-image',
-         params: {dataset_id: this.datasetId}
-       };
-     },
+     }
    },
    methods: {
      prettify(propName, parent) {
