@@ -23,8 +23,8 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       status
-      fdrCounts {
-        level
+      fdrCounts(minFdr: 0, maxFdr: 60) {
+        levels
         counts
       }
     }

@@ -69,7 +69,7 @@
               @click="addFilter('institution')"></span>
       </div>
       <div v-if="dataset.status == 'FINISHED'">
-        <span>{{formatFdrCounts}} annotations @ FDR {{formatFdrLevel}}%</span>
+        <span>{{formatFdrCounts(this.ind)}} annotations @ FDR {{formatFdrLevel(10)}}%</span>
       </div>
     </div>
 
@@ -120,7 +120,6 @@
  import capitalize from 'lodash/capitalize';
  import {deleteDatasetQuery, opticalImageQuery} from '../api/dataset';
  import {getJWT} from '../util';
- import gql from 'graphql-tag';
 
  function removeUnderscores(str) {
    return str.replace(/_/g, ' ');
@@ -237,35 +236,31 @@
 
      disabledClass() {
        return this.disabled ? "ds-item-disabled" : "";
-     },
-
-     formatFdrLevel() {
-       return this.dataset.fdrCounts.level;
-     },
-
-     formatFdrCounts() {
-       return this.dataset.fdrCounts.counts;
      }
    },
    data() {
      return {
        showMetadataDialog: false,
        opticalImageSmall: null,
-       disabled: false
+       disabled: false,
+       ind: null
      };
    },
 
-   mounted() {
-     this.$apollo.query({
+   apollo: {
+     opticalImageUrl: {
        query: opticalImageQuery,
-       variables: {
-         datasetId: this.dataset.id,
-         zoom: 1.
+       variables() {
+         return {
+           datasetId: this.dataset.id,
+           zoom: 1.
+         };
        },
-       fetchPolicy: 'network-only'
-     }).then((res) => {
-       this.opticalImageSmall = res.data.opticalImageUrl;
-     })
+       fetchPolicy: 'network-only',
+       result(res) {
+         this.opticalImageSmall = res.data.opticalImageUrl
+       }
+     }
    },
 
    methods: {
@@ -318,6 +313,15 @@
              }
            });
          }).catch(_ => {});
+     },
+
+     formatFdrLevel(val) {
+       this.ind = this.dataset.fdrCounts.levels.indexOf(val);
+       return this.dataset.fdrCounts.levels[this.ind];
+     },
+
+     formatFdrCounts(ind) {
+       return this.dataset.fdrCounts.counts[ind];
      }
    }
  }
