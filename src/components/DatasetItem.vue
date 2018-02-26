@@ -69,7 +69,7 @@
               @click="addFilter('institution')"></span>
       </div>
       <div v-if="dataset.status == 'FINISHED'">
-        <span>{{formatFdrCounts(this.ind)}} annotations @ FDR {{formatFdrLevel(10)}}%</span>
+        <span>{{formatFdrCounts()}} annotations @ FDR {{formatFdrLevel()}}%</span>
       </div>
     </div>
 
@@ -315,13 +315,12 @@
          }).catch(_ => {});
      },
 
-     formatFdrLevel(val) {
-       this.ind = this.dataset.fdrCounts.levels.indexOf(val);
-       return this.dataset.fdrCounts.levels[this.ind];
+     formatFdrLevel() {
+       return this.dataset.fdrCounts.levels.join(', ');
      },
 
-     formatFdrCounts(ind) {
-       return this.dataset.fdrCounts.counts[ind];
+     formatFdrCounts() {
+       return this.dataset.fdrCounts.counts.join(', ');
      }
    }
  }
