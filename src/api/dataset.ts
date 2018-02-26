@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
 export const datasetListQuery =
-  gql`query GetDatasets($dFilter: DatasetFilter, $query: String) {
+  gql`query GetDatasets($dFilter: DatasetFilter, $query: String, $inpFdrLvls: [Float]) {
     allDatasets(offset: 0, limit: 100, filter: $dFilter, simpleQuery: $query) {
       id
       name
@@ -23,7 +23,7 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       status
-      fdrCounts(minFdr: 0, maxFdr: 60) {
+      fdrCounts(inpFdrLvls: $inpFdrLvls) {
         levels
         counts
       }
@@ -56,6 +56,7 @@ export const submitDatasetQuery =
 export const deleteDatasetQuery =
   gql`mutation ($jwt: String!, $id: String!) {
     deleteDataset(jwt: $jwt, datasetId: $id)
+    deleteOpticalImage(jwt: $jwt, datasetId: $id)
   }`;
 
 export const addOpticalImageQuery =
@@ -66,6 +67,6 @@ export const addOpticalImageQuery =
   }`;
 
 export const deleteOpticalImageQuery =
-  gql`mutation ($jwt: String!, $datasetId: String!) {
-    deleteOpticalImage(jwt: $jwt, datasetId: $datasetId)
+  gql`mutation ($jwt: String!, $id: String!) {
+    deleteOpticalImage(jwt: $jwt, datasetId: $id)
   }`;

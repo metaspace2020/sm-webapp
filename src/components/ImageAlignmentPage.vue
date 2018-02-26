@@ -383,7 +383,7 @@
              mutation: deleteOpticalImageQuery,
              variables: {
                jwt,
-               datasetId: this.datasetId
+               id: this.datasetId
              }
            });
            await this.$message({
