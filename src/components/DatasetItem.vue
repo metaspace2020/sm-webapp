@@ -8,14 +8,17 @@
     </el-dialog>
 
     <div class="opt-image">
-      <router-link :to="opticalImageAlignmentHref" v-if="haveEditAccess">
-        <div class="edit-opt-image" v-if="thumbnailCheck" title="Edit Optical Image">
+      <router-link :to="opticalImageAlignmentHref" v-if="haveEditAccess && dataset.status === 'FINISHED'">
+        <div v-if="thumbnailCheck" class="edit-opt-image" title="Edit Optical Image">
           <img class="opt-image-thumbnail" :src="opticalImageSmall" width="100px" height="100px" alt="Edit optical image"/>
         </div>
-        <div class="no-opt-image" v-else title="Add Optical Image"></div>
+        <div v-else class="no-opt-image" title="Add Optical Image">
+          <img class="add-opt-image-thumbnail" src="../assets/no_opt_image.png" width="100px" height="100px" alt="Add optical image"/>
+        </div>
       </router-link>
-      <div class="edit-opt-image-guest" v-else>
+      <div v-else class="edit-opt-image-guest">
         <img v-if="thumbnailCheck" :src="opticalImageSmall" width="100px" height="100px" alt="Optical image"/>
+        <img v-else src="../assets/no_opt_image.png" width="100px" height="100px" alt="Optical image"/>
       </div>
     </div>
 
@@ -134,7 +137,7 @@
 
    computed: {
      thumbnailCheck() {
-       return this.opticalImageSmall && this.dataset.status == 'FINISHED'
+       return this.opticalImageSmall!=null
      },
 
      opticalImageAlignmentHref() {
@@ -300,9 +303,14 @@
                  id: this.dataset.id
              }});
            })
-           .then(resp => resp.data.deleteDataset)
+           .then(resp => {
+             return {
+               deleteDataset: resp.data.deleteDataset,
+               deleteOptImage: resp.data.deleteOpticalImage
+             }
+           })
            .then(status => {
-             if (status != 'success') {
+             if (status.deleteDataset != 'success') {
                this.$message({
                  message: "Deletion failed :( Contact us: contact@metaspace2020.eu" + "(error: " + status + ")",
                  type: 'error',
@@ -310,6 +318,9 @@
                  showClose: true
                });
                this.disabled = false;
+             }
+             if(status.deleteOptImage != 'success') {
+               console.log('Deletion of optical image failed whlie dataset was being deleted' + ' :' + status['deleteOptImage']);
              }
            });
          }).catch(_ => {});
@@ -332,28 +343,29 @@
     display: block;
     width: 100px;
     height: 100px;
-    border: 1px solid rgba(0, 0, 0, 0.6);
-    border-style: dotted;
-    cursor: pointer;
+    outline: 1px dotted rgba(0, 0, 0, 0.6);
+    z-index: 0;
   }
 
-  .no-opt-image::before {
+  .no-opt-image:hover::before {
+    font-family: 'element-icons' !important;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.5em;
+    color: #2c3e50;
     position: absolute;
-    content: '';
+    content: '\E62B';
     display: block;
     width: 30px;
     height: 30px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    opacity: .5;
-    background-image: url('../assets/add_opt_image.png');
-    background-size: contain;
-    cursor: pointer;
   }
 
-  .no-opt-image:hover::before{
-    opacity: .7;
+
+  .no-opt-image:hover{
+    cursor: pointer;
   }
 
   .edit-opt-image, .edit-opt-image-guest {
@@ -384,8 +396,8 @@
     cursor: pointer;
   }
 
-  .opt-image-thumbnail:hover {
-    opacity: 0.2;
+  .opt-image-thumbnail:hover, .add-opt-image-thumbnail:hover{
+    opacity: .2;
   }
 
  .dataset-item {

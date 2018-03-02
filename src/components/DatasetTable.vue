@@ -229,7 +229,7 @@
          query: this.$store.getters.ftsQuery,
          inpFdrLvls: []
        };
-       if (status === 'FINISHED') {body['inpFdrLvls'] = [5, 10, 20, 50, 100]}
+       if (status === 'FINISHED') {body['inpFdrLvls'] = [10]};
        return body
      },
 
