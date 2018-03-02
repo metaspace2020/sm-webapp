@@ -356,6 +356,7 @@
      },
 
      addOpticalImage(imageUrl) {
+       // TODO if there are no iso images found prevent optical image addition
        return getJWT()
            .then(jwt =>
                this.$apollo.mutate({
@@ -379,24 +380,37 @@
        try {
          if (this.alreadyUploaded) {
            let jwt = await getJWT();
-           await this.$apollo.mutate({
+           let delRes = await this.$apollo.mutate({
              mutation: deleteOpticalImageQuery,
              variables: {
                jwt,
                id: this.datasetId
              }
            });
-           await this.$message({
-             type: 'success',
-             message: 'The image and alignment were successfully deleted!'
-           });
+           if (delRes.data.deleteOpticalImage != 'success') {
+             this.$message({
+               type: 'error',
+               message: "Couldn't delete optical image due to an error"
+             })}
+           else {
+             this.destroyOptImage();
+             this.$message({
+               type: 'success',
+               message: 'The image and alignment were successfully deleted!'
+             });
+           }
+         } else {
+           this.destroyOptImage();
          }
-         this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
-         this.file = '';
-         return 'Success'
+         return 'success'
        } catch(e) {
          return e.message
        }
+     },
+
+     destroyOptImage() {
+       this.opticalImgUrl = window.URL.revokeObjectURL(this.opticalImgUrl);
+       this.file = '';
      },
 
      reset() {
