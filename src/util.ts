@@ -98,6 +98,10 @@ function mdTypeSupportsOpticalImages(mdType: string): boolean {
   return !mdTypesToSkipImages.includes(mdType);
 }
 
+function browserSupportsDomToImage(): boolean {
+  return window.navigator.userAgent.includes('Chrome');
+}
+
 export {
   renderMolFormula,
   prettifySign,
@@ -109,5 +113,6 @@ export {
   mzFilterPrecision,
   csvExportHeader,
   scrollDistance,
-  mdTypeSupportsOpticalImages
+  mdTypeSupportsOpticalImages,
+  browserSupportsDomToImage
 };
