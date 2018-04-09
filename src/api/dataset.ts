@@ -51,7 +51,7 @@ export const rawOpticalImageQuery =
 
 export const submitDatasetQuery =
   gql`mutation ($jwt: String!, $path: String!, $value: String!) {
-    submitDataset(jwt: $jwt, path: $path, metadataJson: $value, priority: 1)
+    submitDataset(jwt: $jwt, path: $path, metadataToValidate: $value, priority: 1)
   }`;
 
 export const deleteDatasetQuery =
