@@ -32,7 +32,8 @@
                      :colormapName="colormapName"
                      :opacity="opacity"
                      :imageLoaderSettings="imageLoaderSettings"
-                     :onImageZoom="onImageZoom"
+                     :zoom="imagePosition.zoom"
+                     v-on:zoom-input="onImageZoom"
                      :onImageMove="onImageMove"
                      :acquisitionGeometry="msAcqGeometry"
                      v-on:opacityInput="newVal => opacity = newVal">
