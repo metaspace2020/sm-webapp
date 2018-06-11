@@ -31,7 +31,7 @@
         </colorbar>
         {{ annotation.isotopeImages[0].minIntensity.toExponential(2) }}
 
-        <div class="annot-view__image-download" v-if="browserSupportsDomToImage">
+        <div class="annot-view__image-download" v-if="ableToSaveImage">
         <!-- see https://github.com/tsayen/dom-to-image/issues/155 -->
         <img src="../../../assets/download-icon.png"
              width="32px"
@@ -50,6 +50,7 @@ import { saveAs } from 'file-saver';
 
 import Colorbar from '../../Colorbar.vue';
 import ImageLoader from '../../ImageLoader.vue';
+import { browserSupportsDomToImage } from '../../../util';
 
 @Component({
     name: 'main-image',
@@ -80,6 +81,10 @@ export default class MainImage extends Vue {
       return this.colormap[0] == '-' ? 'bottom' : 'top';
     }
 
+    get ableToSaveImage(): boolean {
+      return browserSupportsDomToImage();
+    }
+
     saveImage(event: any): void {
       let node = this.$refs.imageLoader.getContainer();
 
@@ -91,10 +96,6 @@ export default class MainImage extends Vue {
         .then(blob => {
           saveAs(blob, `${this.annotation.id}.png`);
         })
-    }
-
-    get browserSupportsDomToImage(): boolean {
-      return window.navigator.userAgent.includes('Chrome');
     }
 
     onOpacityInput(val: number): void {
