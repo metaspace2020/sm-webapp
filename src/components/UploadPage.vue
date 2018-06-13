@@ -170,7 +170,7 @@
        this.uploadedUuid = null;
      },
 
-     async onFormSubmit(_, metadataJson, isPublic) {
+     async onFormSubmit(_, metadataJson, metaspaceOptions) {
        // Prevent duplicate submissions if user double-clicks
        if (this.isSubmitting) return;
        this.isSubmitting = true;
@@ -179,10 +179,11 @@
          await this.$apollo.mutate({
            mutation: submitDatasetQuery,
            variables: {
-             jwt: await getJWT(),
-             path: pathFromUUID(this.uploadedUuid),
-             metadataJson,
-             isPublic
+             input: {
+               path: pathFromUUID(this.uploadedUuid),
+               metadataJson,
+               ...metaspaceOptions,
+             }
            }
          });
 

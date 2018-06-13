@@ -204,7 +204,7 @@
      },
 
      metaboliteDatabases() {
-       const dbs = this.metadata.metaspace_options.Metabolite_Database;
+       const dbs = this.dataset.molDBs;
        if (typeof dbs === 'string')
          return [dbs];
        else

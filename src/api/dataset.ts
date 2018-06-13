@@ -57,17 +57,14 @@ export const thumbnailOptImageQuery =
       thumbnailImage(datasetId: $datasetId) 
   }`;
 
-export const resubmitDatasetQuery =
-  gql`mutation ($jwt: String!, $datasetId: String!, $name: String, 
-                $metadataJson: String, $isPublic: Boolean, $delFirst: Boolean) {
-    resubmitDataset(jwt: $jwt, datasetId: $datasetId, name: $name, 
-                  metadataJson: $metadataJson, isPublic: $isPublic, 
-                  delFirst: $delFirst, priority: 1)
+export const submitDatasetQuery =
+  gql`mutation ($input: DatasetSubmitInput!, $delFirst: Boolean=false) {
+    submitDataset(input: $input, delFirst: $delFirst, priority: 1)
   }`;
 
-export const submitDatasetQuery =
-  gql`mutation ($jwt: String!, $path: String!, $metadataJson: String!, $isPublic: Boolean!) {
-    submitDataset(jwt: $jwt, path: $path, metadataJson: $metadataJson, isPublic: $isPublic, priority: 1)
+export const resubmitDatasetQuery =
+  gql`mutation ($input: DatasetSubmitInput!, $delFirst: Boolean=false) {
+    resubmitDataset(input: $input, delFirst: $delFirst, priority: 1)
   }`;
 
 export const deleteDatasetQuery =
