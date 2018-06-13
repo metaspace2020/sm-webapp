@@ -5,7 +5,7 @@
                       :colormap="colormap"
                       :max-height=500
                       ref="imageLoader"
-                      :half-width=halfWidth
+                      half-width
                       v-bind="imageLoaderSettings"
                       @move="onImageMove">
         </image-loader>
@@ -123,15 +123,6 @@ export default class MainImage extends Vue {
 
     onZoomInput(val: number): void {
       this.$emit('zoom-input', val)
-    }
-
-    get halfWidth(): boolean {
-      if (this.$router.currentRoute.path === '/annotations') {
-        return true
-      }
-      else {
-        return false
-      }
     }
 }
 </script>
