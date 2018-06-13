@@ -5,6 +5,7 @@
                       :colormap="colormap"
                       :max-height=500
                       ref="imageLoader"
+                      :half-width=halfWidth
                       v-bind="imageLoaderSettings"
                       @move="onImageMove">
         </image-loader>
@@ -16,7 +17,7 @@
                         vertical
                         height="150px"
                         :value="opacity"
-                        v-on:input="onOpacityInput"
+                        @input="onOpacityInput"
                         :min=0
                         :max=1
                         :step=0.01
@@ -46,7 +47,7 @@
             width="100%"
             label="Zoom"
             :value="zoomVal"
-            v-on:input="onZoomInput"
+            @input="onZoomInput"
             :min=1
             :max=10
             :step="0.1"
@@ -99,12 +100,13 @@ export default class MainImage extends Vue {
     }
 
     saveImage(event: any): void {
-      let node = this.$refs.imageLoader.$refs.parent
+      let node = this.$refs.imageLoader.getParent(),
+          {imgWidth, imgHeight} = this.$refs.imageLoader.getScaledImageSize();
 
       domtoimage
         .toBlob(node, {
-          width: node.getBoundingClientRect().width,
-          height:  node.getBoundingClientRect().height
+          width: imgWidth >= node.clientWidth ? node.clientWidth : imgWidth,
+          height:  imgHeight >= node.clientHeight ? node.clientHeight : imgHeight
         })
         .then(blob => {
           saveAs(blob, `${this.annotation.id}.png`);
@@ -121,6 +123,15 @@ export default class MainImage extends Vue {
 
     onZoomInput(val: number): void {
       this.$emit('zoom-input', val)
+    }
+
+    get halfWidth(): boolean {
+      if (this.$router.currentRoute.path === '/annotations') {
+        return true
+      }
+      else {
+        return false
+      }
     }
 }
 </script>

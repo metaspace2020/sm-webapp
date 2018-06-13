@@ -6,10 +6,12 @@
        v-resize.debounce.50="onResize"
        :element-loading-text="message">
 
-    <div class="image-loader__container"
-         ref="container" style="align-self: center">
+    <div class="image-loader__container" ref="container" style="align-self: center">
       <div style="text-align: left; z-index: 2; position: relative">
-        <img :src="dataURI" :style="imageStyle" v-on:click="onClick" ref="visibleImage"
+        <img :src="dataURI"
+             :style="imageStyle"
+             @click="onClick"
+             ref="visibleImage"
              class="isotope-image"/>
       </div>
 
@@ -82,6 +84,10 @@
      transform: {
        type: String,
        default: ''
+     },
+     halfWidth: {
+       type: Boolean,
+       default: false
      }
    },
    data () {
@@ -123,17 +129,8 @@
      window.removeEventListener('resize', this.onResize);
    },
    computed: {
-     routeAnnotationsCheck() {
-       if (this.$router.currentRoute.path === '/annotations') {
-         return true
-       }
-       else {
-         return false
-       }
-     },
-
      hideImage() {
-       if (this.routeAnnotationsCheck) {
+       if (this.halfWidth) {
          return 'overflow: hidden;'
        }
      },
@@ -157,21 +154,14 @@
            'width': width + 'px',
            'height': height + 'px',
             transform: transform + ' ' + this.transform,
-           'transform-origin': this.routeAnnotationsCheck ? '50% 50% 0' : '0 0',
-           'clipPath': this.routeAnnotationsCheck ? '' : clipPath,
+           'transform-origin': this.halfWidth ? '50% 50% 0' : '0 0',
+           'clipPath': this.halfWidth ? '' : clipPath,
          };
        } else // LC-MS data (1 x number of time points)
        return {
          width: '100%',
          height: Math.min(100, this.maxHeight) + 'px'
        };
-     },
-
-     imageContainerStyle() {
-       return {
-         width: this.imageWidth + 'px',
-         'align-self': 'center'
-       }
      },
 
      opticalImageStyle() {
@@ -394,12 +384,15 @@
        return this.image;
      },
 
-     getScaleFactor() {
-       return this.scaleFactor;
+     getParent() {
+       return this.$refs.parent;
      },
 
-     getContainer() {
-       return this.$refs.container;
+     getScaledImageSize() {
+       return {
+         'imgWidth': this.$refs.visibleImage.getBoundingClientRect().width,
+         'imgHeight': this.$refs.visibleImage.getBoundingClientRect().height
+       }
      }
    }
  }
