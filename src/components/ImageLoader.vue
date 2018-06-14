@@ -3,7 +3,7 @@
        :style="hideImage"
        v-loading="isLoading"
        ref="parent"
-       v-resize.debounce.50="onResize"
+       v-resize="onResize"
        :element-loading-text="message">
 
     <div class="image-loader__container" ref="container" style="align-self: center">
@@ -11,6 +11,7 @@
         <img :src="dataURI"
              :style="imageStyle"
              @click="onClick"
+             @mousedown="onMouseDown"
              ref="visibleImage"
              class="isotope-image"/>
       </div>
@@ -31,6 +32,7 @@
  // uses loading directive from Element-UI
 
  import {scrollDistance} from '../util';
+ import {throttle} from 'lodash-es';
  import createColormap from '../lib/createColormap';
  import {quantile} from 'simple-statistics';
  import resize from 'vue-resize-directive';
@@ -115,17 +117,21 @@
        dragThrottled: false
      }
    },
+   created() {
+     this.onResize = throttle(this.onResize, 100);
+   },
    mounted() {
      this.image.onload = this.redraw.bind(this);
      this.image.onerror = this.image.onabort = this.onFail.bind(this);
      if (this.src)
        this.loadImage(this.src);
      this.parentDivWidth = this.$refs.parent.clientWidth;
-     this.$refs.visibleImage.addEventListener('mousedown', this.onMouseDown);
      window.addEventListener('resize', this.onResize);
    },
    beforeDestroy() {
      window.removeEventListener('resize', this.onResize);
+     // Cancel any pending callbacks to the throttled resize handler, as $refs is about to be emptied out
+     this.onResize.cancel();
    },
    computed: {
      hideImage() {
@@ -192,11 +198,16 @@
      }
    },
    methods: {
-     onResize() {
+
+     onResize: function() {
        this.parentDivWidth = this.$refs.parent.clientWidth;
        this.determineScaleFactor();
        this.$nextTick(() => {
-         this.updateDimensions();
+         // Occasionally $nextTick calls back after this component is unmounted - double-check visibleImage still exists
+         // before calling updateDimensions
+         if (this.$refs.visibleImage) {
+           this.updateDimensions();
+         }
        });
      },
 
