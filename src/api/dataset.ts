@@ -68,20 +68,20 @@ export const resubmitDatasetQuery =
   }`;
 
 export const deleteDatasetQuery =
-  gql`mutation ($jwt: String!, $id: String!) {
-    deleteDataset(jwt: $jwt, datasetId: $id)
+  gql`mutation ($id: String!) {
+    deleteDataset(datasetId: $id)
   }`;
 
 export const addOpticalImageQuery =
-  gql`mutation ($jwt: String!, $imageUrl: String!,
+  gql`mutation ($imageUrl: String!,
                 $datasetId: String!, $transform: [[Float]]!) {
-    addOpticalImage(input: {jwt: $jwt, datasetId: $datasetId,
+    addOpticalImage(input: {datasetId: $datasetId,
                             imageUrl: $imageUrl, transform: $transform})
   }`;
 
 export const deleteOpticalImageQuery =
-  gql`mutation ($jwt: String!, $id: String!) {
-    deleteOpticalImage(jwt: $jwt, datasetId: $id)
+  gql`mutation ($id: String!) {
+    deleteOpticalImage(datasetId: $id)
   }`;
 
 export const msAcqGeometryQuery =

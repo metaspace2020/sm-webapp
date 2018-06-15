@@ -127,7 +127,7 @@
  import DatasetInfo from './DatasetInfo.vue';
  import {capitalize} from 'lodash-es';
  import {deleteDatasetQuery, thumbnailOptImageQuery} from '../api/dataset';
- import {getJWT, mdTypeSupportsOpticalImages} from '../util';
+ import {mdTypeSupportsOpticalImages} from '../util';
  import {encodeParams} from '../url';
 
  function removeUnderscores(str) {
@@ -314,11 +314,9 @@
 
        try {
          this.disabled = true;
-         const jwt = await getJWT();
          const resp = await this.$apollo.mutate({
            mutation: deleteDatasetQuery,
            variables: {
-             jwt,
              id: this.dataset.id
            }
          });

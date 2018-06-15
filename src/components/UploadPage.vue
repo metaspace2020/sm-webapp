@@ -63,7 +63,7 @@
  import Vue from 'vue';
 
  import * as config from '../clientConfig.json';
- import {getJWT, pathFromUUID} from '../util';
+ import {pathFromUUID} from '../util';
  import {submitDatasetQuery} from '../api/dataset';
 
  const DataTypeConfig = {

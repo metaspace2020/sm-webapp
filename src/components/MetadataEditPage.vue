@@ -10,7 +10,6 @@
 
 <script>
  import MetadataEditor from './MetadataEditor/MetadataEditor.vue';
- import {getJWT} from '../util';
  import {resubmitDatasetQuery} from '../api/dataset';
  import {updateMetadataQuery} from '../api/metadata';
 
