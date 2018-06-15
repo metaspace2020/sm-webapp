@@ -1,15 +1,15 @@
 <template>
   <div class="metadata-section">
-    <div class="heading">{{section.title}}</div>
+    <div class="heading">METASPACE options</div>
 
     <el-form size="medium"
              label-position="top">
       <el-col :span="6">
         <form-field
-          type="select"
+          type="selectMulti"
           name="Metabolite database"
           :help="dbHelp"
-          value="molDBs"
+          :value="value.molDBs"
           @input="val => onInput('molDBs', val)"
           :error="error && error.molDBs"
           :options="molDBOptions"
@@ -18,9 +18,9 @@
       </el-col>
       <el-col :span="6">
         <form-field
-          type="select"
+          type="selectMulti"
           name="Adducts"
-          value="adducts"
+          :value="value.adducts"
           @input="val => onInput('adducts', val)"
           :error="error && error.adducts"
           :options="adductOptions"
@@ -32,7 +32,7 @@
           type="text"
           name="Dataset name"
           placeholder="Dataset name"
-          value="name"
+          :value="value.name"
           @input="val => onInput('name', val)"
           :error="error && error.name"
           required

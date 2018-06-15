@@ -64,10 +64,10 @@ const FILTER_SPECIFICATIONS = {
     description: 'Select database',
     levels: ['annotation'],
     defaultInLevels: ['annotation'],
-    initialValue: lists => lists.molDBOptions
+    initialValue: lists => lists.molecularDatabases
                                 .filter(d => d.default)
                                 .map(d => d.name)[0],
-    options: lists => lists.molDBOptions.map(d => d.name),
+    options: lists => lists.molecularDatabases.map(d => d.name),
     removable: false
   },
 

@@ -168,7 +168,7 @@
        return without(allSections, ...specialSections);
      },
      adductOptions() {
-       return this.possibleAdducts[get(this.value, ['MS_Analysis', 'Polarity'] || 'Positive')];
+       return this.possibleAdducts[get(this.value, ['MS_Analysis', 'Polarity']) || 'Positive'];
      }
    },
    methods: {
@@ -253,7 +253,7 @@
          // This is because we it's expensive to change database later. We want a smart default for new users,
          // but if the user has previously selected a value that is now invalid, they should be made aware so that they
          // can choose an appropriate substitute.
-         const selectedDbs = metaspaceOptions || [];
+         const selectedDbs = metaspaceOptions.molDBs || [];
          if (selectedDbs.some(db => !this.molDBOptions.includes(db))) {
            metaspaceOptions.molDBs = [];
          } else if (selectedDbs.length === 0) {
@@ -333,7 +333,7 @@
        const selectedAdducts = this.metaspaceOptions.adducts;
        let newAdducts = selectedAdducts.filter(adduct => this.adductOptions.includes(adduct))
        // Default to selecting all valid adducts (at least until the less common adducts are added)
-       if (newAdducts.length === 0 && selectedAdducts.length !== 0) {
+       if (newAdducts.length === 0) {
          newAdducts = this.adductOptions.slice();
        }
        this.metaspaceOptions.adducts = newAdducts;

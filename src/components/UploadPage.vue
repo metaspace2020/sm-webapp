@@ -180,7 +180,7 @@
            mutation: submitDatasetQuery,
            variables: {
              input: {
-               path: pathFromUUID(this.uploadedUuid),
+               inputPath: pathFromUUID(this.uploadedUuid),
                metadataJson,
                ...metaspaceOptions,
              }
