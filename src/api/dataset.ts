@@ -23,6 +23,7 @@ export const datasetListQuery =
       growthConditions
       metadataJson
       isPublic
+      molDBs
       status
       metadataType
       fdrCounts(inpFdrLvls: $inpFdrLvls, checkLvl: $checkLvl) {
