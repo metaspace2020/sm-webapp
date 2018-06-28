@@ -1,3 +1,5 @@
+# This project has been migrated into https://github.com/metaspace2020/metaspace
+
 [![CircleCI](https://circleci.com/gh/METASPACE2020/sm-webapp/tree/master.svg?style=svg)](https://circleci.com/gh/METASPACE2020/sm-webapp/tree/master)
 
 # sm-webapp
